@@ -77,3 +77,31 @@ class Book(models.Model):
 
     def __str__(self):
         return self.book_title
+
+
+class Reader(models.Model):
+    """
+    Model predstavujúci čitateľa.
+
+    Atribúty:
+        user_id (IntegerField): ID používateľa čitateľa.
+    """
+    user_id = models.IntegerField()
+
+    def __str__(self):
+        return f'Čitateľ {self.id}'
+
+
+class MyPromptType(models.Model):
+    """
+    Model predstavujúci užívateľský typ promptu.
+
+    Atribúty:
+        myprompt_type_name (CharField): Názov užívateľského typu promptu.
+        reader (ForeignKey): Čitateľ spojený s týmto typom promptu, odkaz na Reader.
+    """
+    myprompt_type_name = models.CharField(max_length=255)
+    reader = models.ForeignKey(Reader, on_delete=models.CASCADE, related_name='myprompt_types')
+
+    def __str__(self):
+        return self.myprompt_type_name
