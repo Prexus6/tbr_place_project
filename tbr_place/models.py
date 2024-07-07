@@ -23,7 +23,7 @@ class Prompt(models.Model):
         prompt_name (TextField): Názov / obsah promptu.
         prompt_type (ForeignKey): Typ promptu, referencuje PromptType.
     """
-    prompt_name = models.TextField()
+    prompt_name = models.TextField(250, blank=False, null=False)
     prompt_type = models.ForeignKey(PromptType, on_delete=models.CASCADE, related_name='prompts')
 
     def __str__(self):
