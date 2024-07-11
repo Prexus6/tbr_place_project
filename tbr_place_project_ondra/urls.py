@@ -1,10 +1,12 @@
 from django.contrib import admin
-from django.urls import path
-from tbr_place import views  # Import views z tbr_place
+from django.urls import path, include
+from tbr_place import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index, name='index'),  # Nastavení základní cesty pro domovskou stránku
-    path('random-prompt/', views.generate_random_prompt, name='generate_random_prompt'),
-    path('index.html', views.index, name='index_html'),  # Přidání konkrétní cesty pro index.html
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('', views.index, name='index'),
+    path('register/', views.RegisterView.as_view(), name='register'),  # Pokud máte vlastní registraci
+    # nebo pokud používáte django-allauth
+    path('accounts/', include('allauth.urls')),
 ]

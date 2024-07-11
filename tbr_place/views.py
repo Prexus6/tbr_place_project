@@ -1,35 +1,33 @@
+# tbr_place/views.py
 from django.shortcuts import render
-from . models import Prompt
-# Create your views here.
-import random
-from django.contrib import messages
+from django.contrib.auth.views import LoginView, LogoutView
+from django.shortcuts import render, redirect
+from django.views import View
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login, authenticate
 
 
-def generate_random_prompt(request):
-    """
-    Generovanie náhodného promptu.
-    """
-    try:
-        prompts = Prompt.objects.all()
-        if not prompts:
-            raise ValueError('No prompts available.')
-
-        random_prompt = random.choice(prompts)
-        context = {
-            'prompt_name': random_prompt.prompt_name,
-            'prompt_type': random_prompt.prompt_type.prompt_type_name
-        }
-        messages.success(request, 'Prompt successfully generated!')
-
-    except ValueError as e:
-        context = {
-            'prompt_name': 'No prompts available',
-            'prompt_type': 'N/A'
-        }
-        messages.warning(request, str(e))
-
-    return render(request, 'index.html', context)
+class CustomLoginView(LoginView):
+    template_name = 'registration/login.html'
 
 def index(request):
     return render(request, 'index.html')
+class RegisterView(View):
+    form_class = UserCreationForm
+    template_name = 'registration/register.html'
+
+    def get(self, request):
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            user = form.save()
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=password)
+            login(request, user)
+            return redirect('index')
+        return render(request, self.template_name, {'form': form})
 

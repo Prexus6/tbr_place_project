@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="/static/admin/css/base.css">
+    <link rel="stylesheet" href="/static/admin/css/dark_mode.css">
+</head>
+<body>
+    <header>
+        <div id="branding">
+            <div id="site-name"><a href="/">TBR Place</a></div>
+        </div>
+    </header>
+    <main>
+        <h2>Register</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Register</button>
+        </form>
+        <a href="{% url 'login' %}">Login</a>
+    </main>
+</body>
+</html>
+
+
