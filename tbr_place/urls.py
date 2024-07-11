@@ -1,13 +1,8 @@
-from django.conf import settings
-from django.conf.urls.static import static
 from django.urls import path
-from .views import generate_random_prompt
+from . import views
 
 urlpatterns = [
-    path('random-prompt/', generate_random_prompt, name='generate_random_prompt'),
-
+    path('', views.index, name='index'),  # Přidá cestu pro hlavní stránku
+    path('random-prompt/', views.generate_random_prompt, name='generate_random_prompt'),
+    # Další cesty...
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
