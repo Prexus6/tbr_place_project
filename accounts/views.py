@@ -1,31 +1,36 @@
-from django.shortcuts import render
-from . models import Prompt
-# Create your views here.
-import random
+from django.contrib.auth import login, logout
+from django.shortcuts import render, redirect
+from .forms import SignupForm
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 
+def signup_view(request):
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('index')
+    else:
+        form = SignupForm()
+    return render(request, 'accounts/signup.html', {'form': form})
 
-def generate_random_prompt(request):
-    """
-    Generovanie náhodného promptu.
-    """
-    try:
-        prompts = Prompt.objects.all()
-        if not prompts:
-            raise ValueError('No prompts available.')
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('index')
+        else:
+            messages.error(request, 'Invalid username or password.')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'accounts/login.html', {'form': form})
 
-        random_prompt = random.choice(prompts)
-        context = {
-            'prompt_name': random_prompt.prompt_name,
-            'prompt_type': random_prompt.prompt_type.prompt_type_name
-        }
-        messages.success(request, 'Prompt successfully generated!')
+def logout_view(request):
+    logout(request)
+    return render(request, 'accounts/logout.html')
 
-    except ValueError as e:
-        context = {
-            'prompt_name': 'No prompts available',
-            'prompt_type': 'N/A'
-        }
-        messages.warning(request, str(e))
-
-    return render(request, 'index.html', context)
+def index(request):
+    return render(request, 'accounts/index.html')

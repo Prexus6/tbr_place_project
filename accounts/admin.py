@@ -1,17 +1,12 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from .models import CustomUser
 
-from tbr_place.models import Prompt, PromptType
+class CustomUserAdmin(UserAdmin):
+    model = CustomUser
+    list_display = ('username', 'email', 'is_staff', 'is_active',)
+    list_filter = ('is_staff', 'is_active',)
+    search_fields = ('username', 'email',)
+    ordering = ('username',)
 
-
-# Register your models here.
-
-@admin.register(Prompt)
-class PromptAdmin(admin.ModelAdmin):
-    list_display = ('prompt_name', 'prompt_type')
-    search_fields = ('prompt_name',)
-
-
-@admin.register(PromptType)
-class PromptTypeAdmin(admin.ModelAdmin):
-    list_display = ('prompt_type_name',)
-    search_fields = ('prompt_type_name',)
+admin.site.register(CustomUser, CustomUserAdmin)

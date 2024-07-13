@@ -28,4 +28,4 @@ def generate_random_prompt(request):
         }
         messages.warning(request, str(e))
 
-    return render(request, 'index.html', context)
+    return render(request, 'accounts/index.html', context)
