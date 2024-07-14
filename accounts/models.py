@@ -62,7 +62,7 @@ class Reader(models.Model):
     user_id = models.IntegerField(unique=True)
 
     def __str__(self):
-        return f'Čitateľ {self.user_id}'
+        return f'Reader {self.user_id}'
 
 class MyPromptType(models.Model):
     myprompt_type_name = models.CharField(max_length=255)
@@ -83,6 +83,7 @@ class BrowsingHistory(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     url = models.URLField()
     timestamp = models.DateTimeField(auto_now_add=True)
+
 
 
 
