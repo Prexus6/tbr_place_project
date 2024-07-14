@@ -20,8 +20,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from tbr_place.views import add_book_view, home_view
+
 urlpatterns = [
+    path('', home_view, name='home'),
     path("admin/", admin.site.urls),
     path('tbr-place/', include('tbr_place.urls')),
+    path('add-book/', add_book_view, name='add_book'),
 
 ]

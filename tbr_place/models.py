@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator
 
 
 class PromptType(models.Model):
@@ -73,7 +73,7 @@ class Book(models.Model):
     book_genre = models.ManyToManyField(Genre, related_name='books')
     book_rating = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
     book_cover = models.ImageField(upload_to='book_covers/')
-    isbn = models.CharField(max_length=13, unique=True)  # Predpokladáme formát ISBN-13
+    isbn = models.CharField(max_length=13, unique=True,  validators=[MinLengthValidator(13)])
 
     def __str__(self):
         return self.book_title
@@ -86,7 +86,7 @@ class Reader(models.Model):
     Atribúty:
         user_id (IntegerField): ID čitateľa.
     """
-    user_id = models.IntegerField(unique=True)  # Predpokladáme, že user_id je jedinečné
+    user_id = models.IntegerField(unique=True)
 
     def __str__(self):
         return f'Čitateľ {self.user_id}'
