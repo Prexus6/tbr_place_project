@@ -1,68 +1,56 @@
 import requests
-from django.core.files import File
 from io import BytesIO
+from django.core.files.base import ContentFile
+from django.db.utils import IntegrityError
 from .models import Book, Author, Genre
 
-
-def get_book_details(isbn):
-    url = f"https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}&jscmd=data&format=json"
+def search_books_by_title(title):
+    url = f"https://openlibrary.org/search.json?title={title}"
     response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        book_key = f"ISBN:{isbn}"
-        if book_key in data:
-            book_data = data[book_key]
-            return book_data
-    return None
+    return response.json()
 
+def save_book_from_open_library(book_info):
+    author_name = book_info['author_name']
+    genres = book_info['genres']
+    title = book_info['title']
+    isbn = book_info['isbn']
+    rating = book_info['rating']
+    cover_url = book_info['cover_url']
 
-def save_book_details(isbn):
-    book_data = get_book_details(isbn)
-    if not book_data:
-        print("No details found for this ISBN")
+    if not isbn:
+        print(f"Book titled '{title}' does not have a valid ISBN. Skipping.")
         return
 
-    title = book_data.get('title', 'Unknown Title')
-    authors_data = book_data.get('authors', [])
-    genres_data = book_data.get('subjects', [])
-    cover_url = book_data.get('cover', {}).get('large', '')
+    if Book.objects.filter(isbn=isbn).exists():
+        print(f"Book with ISBN {isbn} already exists. Skipping.")
+        return
 
-    authors = []
-    for author_data in authors_data:
-        author_name = author_data.get('name', 'Unknown Author')
-        author, created = Author.objects.get_or_create(author_name=author_name)
-        authors.append(author)
+    author, created = Author.objects.get_or_create(author_name=author_name)
 
-    if not authors:
-        author, created = Author.objects.get_or_create(author_name="Unknown Author")
-        authors.append(author)
+    try:
+        book = Book.objects.create(
+            book_title=title,
+            book_author=author,
+            book_rating=rating,
+            isbn=isbn
+        )
 
-    genres = []
-    for genre_data in genres_data:
-        genre_name = genre_data.get('name', 'Unknown Genre')
-        genre, created = Genre.objects.get_or_create(genre_name=genre_name)
-        genres.append(genre)
+        for genre_name in genres:
+            genre, created = Genre.objects.get_or_create(genre_name=genre_name)
+            book.book_genre.add(genre)
 
-    book = Book(
-        book_title=title,
-        book_rating=0.0,
-        isbn=isbn
-    )
+        if cover_url:
+            """
+            Uloží cover.
+            """
+            response = requests.get(cover_url)
+            if response.status_code == 200:
+                image_data = BytesIO(response.content)
+                book.book_cover.save(f"{isbn}.jpg", ContentFile(image_data.getvalue()), save=True)
+            else:
+                print(f"Failed to fetch cover image for book with ISBN {isbn}")
 
-    if cover_url:
-        response = requests.get(cover_url)
-        if response.status_code == 200:
-            image_name = f"{isbn}.jpg"
-            image_data = BytesIO(response.content)
-            book.book_cover.save(image_name, File(image_data))
-
-    book.save()
-
-    book.book_author = authors[0]
-    book.save()
-
-    book.book_genre.set(genres)
-    book.save()
-
-    print(f"Book '{title}' saved successfully.")
-
+        book.save()
+        print(f"Saved book with ISBN {isbn} successfully.")
+    except IntegrityError as e:
+        print(f"Failed to save book with ISBN {isbn}: {e}")

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from tbr_place.models import Prompt, PromptType
+from tbr_place.models import Prompt, PromptType, Book
 
 
 # Register your models here.
@@ -15,3 +15,5 @@ class PromptAdmin(admin.ModelAdmin):
 class PromptTypeAdmin(admin.ModelAdmin):
     list_display = ('prompt_type_name',)
     search_fields = ('prompt_type_name',)
+
+admin.site.register(Book)

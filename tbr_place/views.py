@@ -1,9 +1,8 @@
-from django.http import JsonResponse
 from django.shortcuts import render
 from .models import Prompt, MyPrompt
 import random
 from django.contrib import messages
-from .utils import save_book_details
+from .utils import save_book_from_open_library, search_books_by_title
 
 
 def generate_random_prompt(request):
@@ -29,7 +28,7 @@ def generate_random_prompt(request):
         }
         messages.warning(request, str(e))
 
-    return context
+    return render(request, 'index.html', context)
 
 
 def generate_custom_prompt(request):
@@ -57,25 +56,44 @@ def generate_custom_prompt(request):
     return context
 
 
-def search_book(request):
-    pass
+def search_books_view(request):
+    """
+    Zobrazuje formulár pre vyhľadávanie kníh a spracúva POST požiadavky.
 
+    Ak je požiadavka typu POST, získa názov knihy z formulára, vyhľadá knihy
+    podľa tohto názvu pomocou externého API (Open Library), a uloží nájdené
+    knihy do databázy. Zobrazí správu o úspešnom uložení kníh. Inak zobrazí
+    formulár pre vyhľadávanie kníh.
 
-def add_book_view(request):
-    """ Zkladanie získaných kníh (for API functions settings, check utils.py) """
-    isbn = request.GET.get('isbn')
-    if isbn:
-        save_book_details(isbn)
-        return JsonResponse({"message": "Book details fetched and saved."})
-    return JsonResponse({"message": "ISBN not provided."})
+    """
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        results = search_books_by_title(title)
+        books = results.get('docs', [])
+
+        for book_data in books:
+            book_info = {
+                "title": book_data.get('title'),
+                "author_name": book_data.get('author_name', [''])[0],
+                "genres": book_data.get('subject', []),
+                "isbn": book_data.get('isbn', [''])[0],
+                "rating": 0.0,
+                "cover_url": book_data.get('cover_url', "")
+            }
+            save_book_from_open_library(book_info)
+
+        messages.success(request, 'Books successfully fetched and saved!')
+
+    return render(request, 'search_books.html')
 
 
 def home_view(request):
-    """ Hlavná stránka """
+    """ Hlavná stránka (testovacia verzia šablony)"""
     context = {}
 
-    context.update(generate_random_prompt(request))
-    context.update(generate_custom_prompt(request))
+    if request.method == 'POST':
+        context.update(generate_random_prompt(request))
+
     context['book_message'] = "test message"
 
     return render(request, 'index.html', context)

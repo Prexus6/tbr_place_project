@@ -1,11 +1,13 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
-from .views import generate_random_prompt, add_book_view
+from .views import generate_random_prompt, search_books_view, home_view
 
 urlpatterns = [
+    path('add-book/', search_books_view, name='search_books_view'),
+    path('', home_view, name='home'),
     path('random-prompt/', generate_random_prompt, name='generate_random_prompt'),
-    path('add-book/', add_book_view, name='add_book'),
+    path('search/', search_books_view, name='search_books'),
 
 ]
 
