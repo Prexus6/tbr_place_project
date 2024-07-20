@@ -27,12 +27,15 @@ def login_view(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
+                messages.success(request, f'You have successfully logged in as {username}.')
                 return redirect('index')
             else:
                 messages.error(request, 'Invalid username or password.')
     else:
         form = CustomUserLoginForm()
     return render(request, 'accounts/login.html', {'form': form})
+
+
 
 def logout_view(request):
     logout(request)

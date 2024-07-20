@@ -26,6 +26,13 @@
     </header>
     <main>
         <h2>Welcome to TBR Place</h2>
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
     </main>
     <footer>
         <p>&copy; 2024 TBR Place</p>
