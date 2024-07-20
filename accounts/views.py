@@ -1,38 +1,48 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate, logout, get_user_model
-from django.contrib import messages
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.forms import AuthenticationForm
 from .forms import CustomUserCreationForm
-from django.shortcuts import render
 
-def index(request):
-    return render(request, 'index.html')
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('index')  # Přesměruje na index po přihlášení
+    else:
+        form = AuthenticationForm()
+    return render(request, 'accounts/login.html', {'form': form})
 
+def logout_view(request):
+    logout(request)
+    return redirect('index')  # Přesměruje na index po odhlášení
 
-User = get_user_model()
-
-def signup(request):
+def signup_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('index')
+            return redirect('index')  # Přesměruje na index po registraci
     else:
         form = CustomUserCreationForm()
-    return render(request, 'signup.html', {'form': form})
+    return render(request, 'accounts/signup.html', {'form': form})
 
-def login_view(request):
+def forgot_password_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        security_answer = request.POST['security_answer'].lower()
+        username = request.POST.get('username')
         try:
-            user = User.objects.get(username=username, security_answer=security_answer)
-            login(request, user)
-            return redirect('index')
-        except User.DoesNotExist:
-            messages.error(request, 'Invalid username or security answer')
-    return render(request, 'login.html')
+            user = CustomUser.objects.get(username=username)
+            if user.secret_answer == request.POST.get('secret_answer'):
+                # Redirect to a password reset form or handle password reset
+                return redirect('reset_password')  # Assume there's a view for resetting password
+        except CustomUser.DoesNotExist:
+            pass  # Handle user not existing
+    return render(request, 'accounts/forgot_password.html')
 
-def logout_view(request):
-    logout(request)
-    return redirect('login')
+def index_view(request):
+    return render(request, 'index.html')
