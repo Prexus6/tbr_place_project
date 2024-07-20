@@ -6,12 +6,31 @@
     <title>Sign Up</title>
 </head>
 <body>
-    <h2>Sign Up</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign Up</button>
-    </form>
-    <p>Already have an account? <a href="{% url 'login' %}">Sign In</a></p>
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="/static/logo.png" alt="Logo">
+            </div>
+            <div>
+                <h1>TBR Place</h1>
+            </div>
+            <div class="auth-buttons">
+                <a href="/accounts/login/">Login</a>
+                <a href="/accounts/signup/">Sign Up</a>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <h2>Sign Up</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="/accounts/login/">Login</a></p>
+    </main>
+    <footer>
+        <p>&copy; 2024 TBR Place</p>
+    </footer>
 </body>
 </html>

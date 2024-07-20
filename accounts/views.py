@@ -1,57 +1,38 @@
-from django.contrib.auth import login, logout
 from django.shortcuts import render, redirect
+from django.contrib.auth import login, authenticate, logout, get_user_model
 from django.contrib import messages
-from django.views.decorators.csrf import csrf_protect
-from django.contrib.auth.decorators import login_required
-import random
+from .forms import CustomUserCreationForm
+from django.shortcuts import render
 
-from .forms import CustomUserCreationForm, CustomUserAuthenticationForm
+def index(request):
+    return render(request, 'index.html')
 
-@csrf_protect
-def signup_view(request):
+
+User = get_user_model()
+
+def signup(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             return redirect('index')
-        else:
-            messages.error(request, 'Please correct the error below.')
     else:
         form = CustomUserCreationForm()
-    return render(request, 'accounts/signup.html', {'form': form})
+    return render(request, 'signup.html', {'form': form})
 
-@csrf_protect
 def login_view(request):
     if request.method == 'POST':
-        form = CustomUserAuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
+        username = request.POST['username']
+        security_answer = request.POST['security_answer'].lower()
+        try:
+            user = User.objects.get(username=username, security_answer=security_answer)
             login(request, user)
             return redirect('index')
-        else:
-            messages.error(request, 'Invalid username or password.')
-    else:
-        form = CustomUserAuthenticationForm()
-    return render(request, 'accounts/login.html', {'form': form})
+        except User.DoesNotExist:
+            messages.error(request, 'Invalid username or security answer')
+    return render(request, 'login.html')
 
-@login_required
 def logout_view(request):
     logout(request)
-    return render(request, 'accounts/logout.html')
-
-def index(request):
-    return render(request, 'accounts/index.html')
-
-def generate_random_prompt(request):
-    prompts = [
-        {'prompt_name': 'Prompt 1', 'prompt_type': 'Type A'},
-        {'prompt_name': 'Prompt 2', 'prompt_type': 'Type B'},
-        {'prompt_name': 'Prompt 3', 'prompt_type': 'Type C'},
-    ]
-    selected_prompt = random.choice(prompts)
-    context = {
-        'prompt_name': selected_prompt['prompt_name'],
-        'prompt_type': selected_prompt['prompt_type']
-    }
-    return render(request, 'accounts/index.html', context)
+    return redirect('login')
