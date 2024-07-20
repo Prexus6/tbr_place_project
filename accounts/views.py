@@ -55,32 +55,43 @@ def forgot_password_view(request):
     return render(request, 'accounts/forgot_password.html')
 
 def reset_password_view(request):
+    user_id = request.session.get('reset_user_id')
+    if not user_id:
+        messages.error(request, 'Session expired. Please try again.')
+        return redirect('forgot_password')
+
+    try:
+        user = CustomUser.objects.get(id=user_id)
+    except CustomUser.DoesNotExist:
+        messages.error(request, 'User does not exist.')
+        return redirect('forgot_password')
+
     if request.method == 'POST':
         form = SetNewPasswordForm(request.POST)
         if form.is_valid():
             password1 = form.cleaned_data['new_password1']
             password2 = form.cleaned_data['new_password2']
+            new_secret_answer = form.cleaned_data['new_secret_answer']
 
             if password1 != password2:
                 messages.error(request, 'Passwords do not match.')
                 return redirect('reset_password')
 
-            user_id = request.session.get('reset_user_id')
-            if not user_id:
-                messages.error(request, 'Session expired. Please try again.')
-                return redirect('forgot_password')
-
-            try:
-                user = CustomUser.objects.get(id=user_id)
-                user.set_password(password1)
-                user.save()
-                messages.success(request, 'Password reset successfully. You can now log in.')
-                return redirect('login')
-            except CustomUser.DoesNotExist:
-                messages.error(request, 'User does not exist.')
+            user.set_password(password1)
+            user.secret_answer = new_secret_answer
+            user.save()
+            messages.success(request, 'Password and secret answer reset successfully. You can now log in.')
+            return redirect('login')
     else:
         form = SetNewPasswordForm()
-    return render(request, 'accounts/reset_password.html', {'form': form})
+
+    context = {
+        'form': form,
+        'username': user.username,
+        'secret_question': user.secret_question,
+    }
+
+    return render(request, 'accounts/reset_password.html', context)
 
 def index_view(request):
     return render(request, 'index.html')

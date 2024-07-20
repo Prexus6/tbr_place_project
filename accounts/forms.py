@@ -40,6 +40,7 @@ class SecurityQuestionForm(forms.Form):
 class SetNewPasswordForm(forms.Form):
     new_password1 = forms.CharField(label='New password', widget=forms.PasswordInput)
     new_password2 = forms.CharField(label='New password confirmation', widget=forms.PasswordInput)
+    new_secret_answer = forms.CharField(label='New answer to secret question', max_length=255, required=True)
 
     def clean_new_password2(self):
         password1 = self.cleaned_data.get("new_password1")
