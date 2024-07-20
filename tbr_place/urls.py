@@ -1,15 +1,17 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
-from .views import generate_random_prompt, search_books_view, home_view
+from .views import generate_random_prompt, home_view, add_to_favorites, remove_from_favorites
+from . import views
+from django.urls import path
+
 
 urlpatterns = [
-    path('add-book/', search_books_view, name='search_books_view'),
     path('', home_view, name='home'),
-    path('random-prompt/', generate_random_prompt, name='generate_random_prompt'),
-    path('search/', search_books_view, name='search_books'),
-
+    path('add_to_favorites/<int:book_id>/', add_to_favorites, name='add_to_favorites'),
+    path('remove_from_favorites/<int:book_id>/', remove_from_favorites, name='remove_from_favorites'),
 ]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

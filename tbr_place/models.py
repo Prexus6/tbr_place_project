@@ -1,5 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from accounts.models import CustomUser
 
 
 class PromptType(models.Model):
@@ -73,10 +76,22 @@ class Book(models.Model):
     book_genre = models.ManyToManyField(Genre, related_name='books')
     book_rating = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
     book_cover = models.ImageField(upload_to='book_covers/')
-    isbn = models.CharField(max_length=13, unique=True,  validators=[MinLengthValidator(13)])
+    isbn = models.CharField(max_length=13, unique=True, validators=[MinLengthValidator(13)])
 
     def __str__(self):
         return self.book_title
+
+
+class FavoriteBook(models.Model):
+    """Model predstavujúci obľúbené knihy používateľov."""
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='favorite_books')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='favorited_by')
+
+    class Meta:
+        unique_together = ('user', 'book')
+
+    def __str__(self):
+        return f"{self.user.username}'s favorite: {self.book.book_title}"
 
 
 class Reader(models.Model):

@@ -1,56 +1,74 @@
+from urllib import request
+
 import requests
 from io import BytesIO
 from django.core.files.base import ContentFile
 from django.db.utils import IntegrityError
 from .models import Book, Author, Genre
+import re
+import logging
+
+logger = logging.getLogger(__name__)
+
+def is_valid_isbn(isbn):
+    """Validate ISBN-13 format."""
+    return bool(re.match(r'^\d{13}$', isbn))
 
 def search_books_by_title(title):
-    url = f"https://openlibrary.org/search.json?title={title}"
-    response = requests.get(url)
+    print(f"Searching for books with title: {title}")  # Debug print
+
+    response = requests.get(f'https://openlibrary.org/search.json?title={title}')
+    print(f"Response from Open Library: {response.json()}")  # Debug print
     return response.json()
 
+
 def save_book_from_open_library(book_info):
-    author_name = book_info['author_name']
-    genres = book_info['genres']
-    title = book_info['title']
-    isbn = book_info['isbn']
-    rating = book_info['rating']
-    cover_url = book_info['cover_url']
-
-    if not isbn:
-        print(f"Book titled '{title}' does not have a valid ISBN. Skipping.")
+    """
+    Uloží knihu z údajov získaných z Open Library do databázy.
+    """
+    if not book_info['author_name']:
+        print(f"Ignoring book without author: {book_info}")
         return
 
-    if Book.objects.filter(isbn=isbn).exists():
-        print(f"Book with ISBN {isbn} already exists. Skipping.")
-        return
+    author = get_or_create_author(book_info['author_name'])
 
-    author, created = Author.objects.get_or_create(author_name=author_name)
+    book, created = Book.objects.get_or_create(
+        isbn=book_info['isbn'],
+        defaults={
+            'book_title': book_info['title'],
+            'book_author': author,
+            'book_rating': book_info['rating'],
+            'book_cover': book_info['cover_url'],
+        }
+    )
 
-    try:
-        book = Book.objects.create(
-            book_title=title,
-            book_author=author,
-            book_rating=rating,
-            isbn=isbn
-        )
-
-        for genre_name in genres:
-            genre, created = Genre.objects.get_or_create(genre_name=genre_name)
-            book.book_genre.add(genre)
-
-        if cover_url:
-            """
-            Uloží cover.
-            """
-            response = requests.get(cover_url)
-            if response.status_code == 200:
-                image_data = BytesIO(response.content)
-                book.book_cover.save(f"{isbn}.jpg", ContentFile(image_data.getvalue()), save=True)
-            else:
-                print(f"Failed to fetch cover image for book with ISBN {isbn}")
-
+    if not created:
+        book.book_title = book_info['title']
+        book.book_author = author
+        book.book_rating = book_info['rating']
+        book.book_cover = book_info['cover_url']
         book.save()
-        print(f"Saved book with ISBN {isbn} successfully.")
-    except IntegrityError as e:
-        print(f"Failed to save book with ISBN {isbn}: {e}")
+        print(f"Updated existing book: {book}")  # Debug print
+    else:
+        print(f"Created new book: {book}")  # Debug print
+
+    update_genres(book, book_info['genres'])
+
+def get_or_create_author(author_name):
+    """
+    Získa existujúceho autora alebo vytvorí nového na základe mena.
+    """
+    if author_name:
+        author, created = Author.objects.get_or_create(author_name=author_name)
+        return author
+    return None
+
+def update_genres(book, genres):
+    """
+    Uloží alebo aktualizuje žánre knihy.
+    """
+    for genre_name in genres:
+        genre, created = Genre.objects.get_or_create(name=genre_name)
+        book.book_genre.add(genre)
+
+
