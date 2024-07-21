@@ -40,31 +40,25 @@ def logout_view(request):
     return redirect('login')
 
 def forgot_password_view(request):
-    secret_question = None
-    username = None
-
+    secret_question = ""
     if request.method == 'POST':
-        username = request.POST.get('username')
-        secret_answer = request.POST.get('secret_answer')
-
-        if secret_answer:
-            try:
-                user = CustomUser.objects.get(username=username)
-                if user.secret_answer == secret_answer:
-                    request.session['reset_user_id'] = user.id
-                    return redirect('reset_password')
-                else:
-                    messages.error(request, 'Incorrect answer to the secret question.')
-            except CustomUser.DoesNotExist:
-                messages.error(request, 'User does not exist.')
-        else:
+        form = SecurityQuestionForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
             try:
                 user = CustomUser.objects.get(username=username)
                 secret_question = user.secret_question
+                if 'secret_answer' in request.POST:
+                    if user.secret_answer == form.cleaned_data['secret_answer']:
+                        request.session['reset_user_id'] = user.id
+                        return redirect('reset_password')
+                    else:
+                        messages.error(request, 'Incorrect answer to the secret question.')
             except CustomUser.DoesNotExist:
                 messages.error(request, 'User does not exist.')
-
-    return render(request, 'accounts/forgot_password.html', {'username': username, 'secret_question': secret_question})
+    else:
+        form = SecurityQuestionForm()
+    return render(request, 'accounts/forgot_password.html', {'form': form, 'secret_question': secret_question})
 
 def reset_password_view(request):
     if request.method == 'POST':
@@ -77,10 +71,15 @@ def reset_password_view(request):
 
             user = get_object_or_404(CustomUser, id=user_id)
             user.set_password(form.cleaned_data['new_password1'])
-            user.secret_question = form.cleaned_data.get('secret_question')
-            user.secret_answer = form.cleaned_data.get('secret_answer')
+            new_secret_question = form.cleaned_data.get('new_secret_question')
+            new_secret_answer = form.cleaned_data.get('new_secret_answer')
+
+            if new_secret_question:
+                user.secret_question = new_secret_question
+            if new_secret_answer:
+                user.secret_answer = new_secret_answer
             user.save()
-            messages.success(request, 'Password reset successfully. You can now log in.')
+            messages.success(request, 'Password and secret question/answer reset successfully. You can now log in.')
             return redirect('login')
     else:
         user_id = request.session.get('reset_user_id')
