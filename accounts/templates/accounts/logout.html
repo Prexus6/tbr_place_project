@@ -3,32 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <script src="{% static 'script.js' %}" defer></script>
     <title>Logout</title>
 </head>
 <body>
     <header>
-        <nav>
-            <div class="logo">
-                <img src="/static/logo.png" alt="Logo">
-            </div>
-            <div>
-                <h1>TBR Place</h1>
-            </div>
-            <div class="auth-buttons">
-                <a href="/accounts/login/">Login</a>
-                <a href="/accounts/signup/">Sign Up</a>
-            </div>
-        </nav>
+        <img src="{% static 'Logo_charcoal.png' %}" alt="Logo">
     </header>
     <main>
         <h2>Logout</h2>
-        <form method="post">
-            {% csrf_token %}
-            <button type="submit">Logout</button>
-        </form>
+        <p>You have been logged out. <a href="{% url 'login' %}">Login again</a></p>
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
     </main>
     <footer>
-        <p>&copy; 2024 TBR Place</p>
+        <p>© 2024 TBR Place</p>
     </footer>
 </body>
 </html>
