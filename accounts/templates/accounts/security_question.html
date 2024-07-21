@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logout</title>
+    <title>Security Question</title>
 </head>
 <body>
     <header>
@@ -21,10 +21,18 @@
         </nav>
     </header>
     <main>
-        <h2>Logout</h2>
+        <h2>Security Question</h2>
         <form method="post">
             {% csrf_token %}
-            <button type="submit">Logout</button>
+            <p>
+                <label for="id_username">Username:</label>
+                <input type="text" name="username" id="id_username" required>
+            </p>
+            <p>
+                <label for="id_security_answer">What is your favorite book?</label>
+                <input type="text" name="security_answer" id="id_security_answer" required>
+            </p>
+            <button type="submit">Submit</button>
         </form>
     </main>
     <footer>
