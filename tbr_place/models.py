@@ -116,7 +116,7 @@ class MyPromptType(models.Model):
         reader (ForeignKey): Čitateľ spojený s týmto typom promptu, referencuje Reader.
     """
     myprompt_type_name = models.CharField(max_length=255)
-    reader = models.ForeignKey(Reader, on_delete=models.CASCADE, related_name='myprompt_types')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.myprompt_type_name
@@ -133,7 +133,7 @@ class MyPrompt(models.Model):
     """
     prompt_name = models.TextField()
     prompt_type = models.ForeignKey(MyPromptType, on_delete=models.CASCADE, related_name='my_prompts')
-    reader = models.ForeignKey(Reader, on_delete=models.CASCADE, related_name='my_prompts')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.prompt_name

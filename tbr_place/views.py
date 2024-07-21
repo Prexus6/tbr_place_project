@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Prompt, MyPrompt, FavoriteBook, Book
+from .forms import MyPromptForm, MyPromptTypeForm
+from .models import Prompt, MyPrompt, FavoriteBook, Book, MyPromptType, Reader
 import random
 from django.contrib import messages
 from .utils import save_book_from_open_library, search_books_by_title
@@ -38,24 +39,66 @@ def generate_custom_prompt(request):
     Generovanie vlastného náhodného promptu.
     """
     context = {}
+
+    if not request.user.is_authenticated:
+        messages.warning(request, 'You must be logged in to generate a prompt.')
+        return context
+
     if request.method == 'POST':
         selected_types = request.POST.getlist('selectedTypes[]')
 
-        generated_prompt = "Here is your custom prompt: "
+        if not selected_types:
+            messages.warning(request, 'No prompt types have been selected.')
+            return context
 
-        prompts = MyPrompt.objects.filter(prompt_type__myprompt_type_name__in=selected_types)
+        prompts = MyPrompt.objects.filter(
+            prompt_type__myprompt_type_name__in=selected_types,
+            user=request.user
+        )
 
         if prompts.exists():
             random_prompt = random.choice(prompts)
-            generated_prompt += random_prompt.prompt_name
+            generated_prompt = f"Here is your custom prompt: {random_prompt.prompt_name}"
             context['generated_prompt'] = generated_prompt
             messages.success(request, 'Custom prompt successfully generated!')
         else:
-            generated_prompt += "No prompt available for selected types."
+            generated_prompt = "No prompt available for selected types."
             context['generated_prompt'] = generated_prompt
             messages.warning(request, 'No prompts available for selected types.')
 
     return context
+
+@login_required
+def add_my_prompt_type(request):
+    form = MyPromptTypeForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        prompt_type = form.save(commit=False)
+        prompt_type.user = request.user
+        prompt_type.save()
+        messages.success(request, 'Prompt type successfully added!')
+        return redirect('home')  # Redirect to home to avoid resubmission
+    elif request.method == 'POST':
+        messages.error(request, 'Form is invalid. Please correct the errors.')
+
+    return {'prompt_type_form': form}
+
+
+
+
+@login_required
+def add_my_prompt(request):
+    form = MyPromptForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        prompt = form.save(commit=False)
+        prompt.user = request.user
+        prompt.save()
+        messages.success(request, 'Prompt successfully added!')
+        return redirect('home')  # Redirect to home to avoid resubmission
+    elif request.method == 'POST':
+        messages.error(request, 'Form is invalid. Please correct the errors.')
+
+    prompt_types = MyPromptType.objects.filter(user=request.user)
+    return {'prompt_form': form, 'prompt_types': prompt_types}
 
 
 def search_books_and_handle_favorites(request):
@@ -141,22 +184,37 @@ def remove_from_favorites(request, book_id):
 
 @login_required
 def home_view(request):
-    """
-    Hlavná stránka
-    """
+    """ Hlavná stránka """
     context = {}
 
     if request.method == 'POST':
         if 'generate_prompt' in request.POST:
-            context.update(generate_random_prompt(request))
+            result = generate_random_prompt(request)
+            if isinstance(result, dict):
+                context.update(result)
         elif 'selectedTypes[]' in request.POST:
-            context.update(generate_custom_prompt(request))
+            result = generate_custom_prompt(request)
+            if isinstance(result, dict):
+                context.update(result)
+        elif 'add_prompt' in request.POST:
+            result = add_my_prompt(request)
+            if isinstance(result, dict):
+                context.update(result)
+        elif 'add_prompt_type' in request.POST:
+            result = add_my_prompt_type(request)
+            if isinstance(result, dict):
+                context.update(result)
         else:
-            context.update(search_books_and_handle_favorites(request))
-
+            result = search_books_and_handle_favorites(request)
+            if isinstance(result, dict):
+                context.update(result)
     favorites = FavoriteBook.objects.filter(user=request.user)
     context['favorites'] = favorites
-
-    print(f"Context for rendering: {context}")  # Debug print
+    context['prompt_types'] = MyPromptType.objects.filter(user=request.user)
+    context['prompt_form'] = MyPromptForm()
+    context['prompt_type_form'] = MyPromptTypeForm()
 
     return render(request, 'index.html', context)
+
+
+
