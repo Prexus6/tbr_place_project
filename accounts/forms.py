@@ -29,18 +29,13 @@ class CustomUserChangeForm(forms.ModelForm):
         model = CustomUser
         fields = ('username',)
 
-class CustomUserLoginForm(AuthenticationForm):
-    username = forms.CharField(max_length=254)
-    password = forms.CharField(label="Password", widget=forms.PasswordInput)
-
 class SecurityQuestionForm(forms.Form):
-    security_question = forms.CharField(max_length=255)
-    security_answer = forms.CharField(max_length=255, widget=forms.PasswordInput)
+    username = forms.CharField(max_length=255, required=True)
+    secret_answer = forms.CharField(max_length=255, widget=forms.PasswordInput)
 
 class SetNewPasswordForm(forms.Form):
     new_password1 = forms.CharField(label='New password', widget=forms.PasswordInput)
     new_password2 = forms.CharField(label='New password confirmation', widget=forms.PasswordInput)
-    new_secret_answer = forms.CharField(label='New answer to secret question', max_length=255, required=True)
 
     def clean_new_password2(self):
         password1 = self.cleaned_data.get("new_password1")
@@ -48,3 +43,7 @@ class SetNewPasswordForm(forms.Form):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("Passwords don't match")
         return password2
+
+class CustomUserLoginForm(AuthenticationForm):
+    username = forms.CharField(max_length=255, required=True)
+    password = forms.CharField(widget=forms.PasswordInput)

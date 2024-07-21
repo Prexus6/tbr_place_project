@@ -1,3 +1,4 @@
+# admin.py
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser
@@ -7,7 +8,7 @@ class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = CustomUser
-    list_display = ['username', 'email', 'favorite_book', 'secret_question', 'secret_answer']
+    list_display = ['username', 'favorite_book', 'secret_question', 'secret_answer']
     fieldsets = UserAdmin.fieldsets + (
         (None, {'fields': ('favorite_book', 'secret_question', 'secret_answer')}),
     )
