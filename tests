@@ -1,0 +1,24 @@
+PATH TO THE TEST PACKAGE (tests): tbr_place/tests
+
+
+tbr_place/
+  ├── __init__.py
+  ├── tests/
+  │   ├── __init__.py
+  │   ├── models/
+  │   │   ├── __init__.py
+  │   │   ├── test_models_crud.py
+  │   │   ├── test_another_file.py
+  │   │   └── ...
+  │   └── ...
+
+
+Examples of test commands:
+
+Mass testing - bash:     python manage.py test tbr_place.tests
+Model testing - bash:    python manage.py test tbr_place.tests.models
+Testing a specific file: python manage.py test tbr_place.tests.models.test_models_crud
+
+
+
+
