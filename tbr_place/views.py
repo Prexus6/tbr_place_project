@@ -214,11 +214,41 @@ def remove_from_favorites(request, book_id):
         messages.info(request, 'Kniha nebola nájdená v obľúbených.')
     return redirect('home')
 
+@login_required
+def edit_prompt(request, prompt_id):
+    """
+    Editovanie existujúceho promptu.
+    """
+    prompt = get_object_or_404(MyPrompt, id=prompt_id, user=request.user)
+    if request.method == 'POST':
+        form = MyPromptForm(request.POST, instance=prompt)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Prompt successfully updated!')
+            return redirect('home')
+    else:
+        form = MyPromptForm(instance=prompt)
+    return render(request, 'edit_prompt.html', {'form': form})
+
+@login_required
+def remove_prompt(request, prompt_id):
+    try:
+        prompt = MyPrompt.objects.get(id=prompt_id, user=request.user)
+        prompt.delete()
+        messages.success(request, 'Prompt successfully removed!')
+    except MyPrompt.DoesNotExist:
+        messages.error(request, 'Prompt not found or you do not have permission to delete it.')
+
+    return redirect('home')
+
+
 
 @login_required
 def home_view(request):
     """ Hlavná stránka """
     context = {}
+
+    filter_prompt_type = request.GET.get('filter_prompt_type')
 
     if request.method == 'POST':
         if 'generate_prompt' in request.POST:
@@ -252,6 +282,13 @@ def home_view(request):
     context['prompt_types'] = MyPromptType.objects.filter(user=request.user)
     context['prompt_form'] = MyPromptForm()
     context['prompt_type_form'] = MyPromptTypeForm()
+
+    # Filtering user prompts
+    user_prompts = MyPrompt.objects.filter(user=request.user)
+    if filter_prompt_type:
+        user_prompts = user_prompts.filter(prompt_type_id=filter_prompt_type)
+    context['user_prompts'] = user_prompts
+    context['filter_prompt_type'] = filter_prompt_type
 
     return render(request, 'index.html', context)
 

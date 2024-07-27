@@ -184,6 +184,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
       <!--------------------------------- MY PROPMPTS SECTION ----------------------------->
+
+      <!----- pridávanie vlastných promptových štýlov---->
       <div class="div0302-myprompts">
             <h3 class="QuickPromptGenTitle">My prompts</h3>
               <div class="div0302-add-prompt-type">
@@ -195,36 +197,60 @@ document.addEventListener('DOMContentLoaded', function() {
             </form>
         </div>
 
-
+    <!----- pridávanie vlastných promptov na základe vytvorených vlastných typov---->
         <div class="div0303-add-prompt">
             <h3 class="QuickPromptGenTitle">Add a Prompt</h3>
             <form method="post" action="{% url 'home' %}">
                 {% csrf_token %}
                 {{ prompt_form.as_p }}
                 <label for="prompt_type">Select Prompt Type:</label>
-                <select name="prompt_type" id="prompt_type">
-                    {% for type in prompt_types %}
-                        <option value="{{ type.id }}">{{ type.myprompt_type_name }}</option>
-                    {% endfor %}
-                </select>
                 <button type="submit" name="add_prompt">Add Prompt</button>
             </form>
         </div>
 
-
+          <!----- základné zobrazenie funkcionality : zoznam vlastných promptov (len tabuľkovo)+ remove / edit---->
         <div class="div0302-myprompts">
             <h3 class="QuickPromptGenTitle">My Prompts</h3>
-            <ul>
-                {% for prompt in user_prompts %}
-                    <li>{{ prompt.prompt_name }} (Type: {{ prompt.prompt_type.myprompt_type_name }})</li>
-                {% empty %}
-                    <li>No prompts available.</li>
-                {% endfor %}
-            </ul>
+            <table>
+            <thead>
+                <tr>
+                    <th>Prompt Name</th>
+                    <th>Type</th>
+                    <th>Edit</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+                <tbody>
+                    {% for prompt in user_prompts %}
+                       <tr>
+                            <td>{{ prompt.prompt_name }}</td>
+                            <td>{{ prompt.prompt_type.myprompt_type_name }}</td>
+                            <td>
+                                <a href="{% url 'edit_prompt' prompt.id %}">Edit</a>
+                            </td>
+                            <td>
+                                <form method="post" action="{% url 'remove_prompt' prompt.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4">No prompts available.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
       </div>
     </div>
+
+    </div>
+
+    <!----TODO - do tejto sekcie ešte integrovať generátor vlastných promptov s možnosťou fintrácie vlastných typov---->
+
 
     <!------------------------ BOOKS SECTION ---------------------------->
 

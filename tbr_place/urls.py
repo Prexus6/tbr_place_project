@@ -15,6 +15,8 @@ urlpatterns = [
     path('add-my-prompt/', add_my_prompt, name='add_my_prompt'),
     path('search-books/', views.search_books_and_handle_favorites, name='search_books_view'),
     path('search-books-bytitle/<title>/', utils.search_books_by_title),
+    path('edit_prompt/<int:prompt_id>/', views.edit_prompt, name='edit_prompt'),
+    path('remove_prompt/<int:prompt_id>/', views.remove_prompt, name='remove_prompt'),
 
 
 ]
