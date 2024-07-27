@@ -68,6 +68,7 @@ def generate_custom_prompt(request):
 
     return context
 
+
 @login_required
 def add_my_prompt_type(request):
     form = MyPromptTypeForm(request.POST or None)
@@ -81,8 +82,6 @@ def add_my_prompt_type(request):
         messages.error(request, 'Form is invalid. Please correct the errors.')
 
     return {'prompt_type_form': form}
-
-
 
 
 @login_required
@@ -215,6 +214,3 @@ def home_view(request):
     context['prompt_type_form'] = MyPromptTypeForm()
 
     return render(request, 'index.html', context)
-
-
-
