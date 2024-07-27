@@ -14,6 +14,8 @@ urlpatterns = [
     path('generate-custom-prompt/', views.generate_custom_prompt, name='generate_custom_prompt'),
     path('add-my-prompt/', add_my_prompt, name='add_my_prompt'),
     path('search-books/', views.search_books_and_handle_favorites, name='search_books_view'),
+
+#     moj koment
 ]
 
 
