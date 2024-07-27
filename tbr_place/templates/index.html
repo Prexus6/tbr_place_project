@@ -14,7 +14,27 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   </head>
   <body>
+   <!----- TODO - PRIHLASOVACIU ČASŤ Z BAKCENDU IMPLEMENTOVAŤ    ----->
     <div class="div01-nav">
+        <nav>
+            <div>
+                <h1>TBR Place</h1>
+            </div>
+            <div class="auth-buttons">
+                {% if user.is_authenticated %}
+                <p>Welcome, {{ user.username }}!</p>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit">Logout</button>
+                </form>
+                {% else %}
+                <a href="{% url 'login' %}">Sign In</a>
+                <a href="{% url 'signup' %}">Sign Up</a>
+                {% endif %}
+            </div>
+        </nav>
+     <!----- TODO - PRIHLASOVACIU ČASŤ Z BAKCENDU IMPLEMENTOVAŤ    ----->
+
       <div class="div0101-logo">
         <div class="logo-image">
           <img src="Logo_charcoal.png" alt="Logo" class="Logo_charcoal" />
@@ -249,7 +269,51 @@ document.addEventListener('DOMContentLoaded', function() {
 
     </div>
 
-    <!----TODO - do tejto sekcie ešte integrovať generátor vlastných promptov s možnosťou fintrácie vlastných typov---->
+
+    <!-- Generovanie vlastného promptu na základe vybraných typov -->
+    <div class="div0304-generate-prompt">
+        <h3 class="QuickPromptGenTitle">Generate Custom Prompt</h3>
+        <form id="generate-prompt-form" method="post" action="{% url 'generate_custom_prompt' %}">
+            {% csrf_token %}
+            <label for="prompt_types">Select Prompt Types:</label>
+            <select id="prompt_types" name="selectedTypes[]" multiple>
+                {% for type in prompt_types %}
+                    <option value="{{ type.myprompt_type_name }}">{{ type.myprompt_type_name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Generate Prompt</button>
+        </form>
+
+        <div class="generated-prompt">
+            <h4>Generated Prompt:</h4>
+            <p id="generated-prompt-content">{{ generated_prompt }}</p>
+        </div>
+    </div>
+
+ <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+          // zabezpečené nerefreshovanie po vygenerovaní promptu  (testovať všetky verzie prehliadačov)
+$(document).ready(function() {
+    $("form#generate-prompt-form").on("submit", function(event) {
+        event.preventDefault();
+
+        $.ajax({
+            type: "POST",
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            success: function(response) {
+                $("#generated-prompt-content").html(response.generated_prompt);
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX error:", status, error);
+            }
+        });
+    });
+});
+
+</script>
+
 
 
     <!------------------------ BOOKS SECTION ---------------------------->

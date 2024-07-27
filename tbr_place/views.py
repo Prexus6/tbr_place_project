@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from .forms import MyPromptForm, MyPromptTypeForm
 from .models import Prompt, MyPrompt, FavoriteBook, Book, MyPromptType, Reader, PromptType
@@ -40,49 +41,12 @@ def generate_filtered_prompt(request):
     """
     context = {}
 
-    selected_types = request.POST.getlist('selectedTypes')
-
-    if not selected_types:
-        messages.warning(request, 'No prompt types have been selected.')
-        return context
-
-    prompts = Prompt.objects.filter(
-        prompt_type__prompt_type_name__in=selected_types
-    )
-
-    if prompts.exists():
-        random_prompt = random.choice(prompts)
-        context = {
-            'filtered_prompt_name': random_prompt.prompt_name,
-            'filtered_prompt_type': random_prompt.prompt_type.prompt_type_name
-        }
-        messages.success(request, 'Filtered prompt successfully generated!')
-    else:
-        context = {
-            'filtered_prompt_name': 'No prompts available for the selected types',
-            'filtered_prompt_type': 'N/A'
-        }
-        messages.warning(request, 'No prompts available for selected types.')
-
-    return context
-
-
-def generate_custom_prompt(request):
-    """
-    Generovanie vlastného náhodného promptu.
-    """
-    context = {}
-
-    if not request.user.is_authenticated:
-        messages.warning(request, 'You must be logged in to generate a prompt.')
-        return context
-
     if request.method == 'POST':
         selected_types = request.POST.getlist('selectedTypes[]')
 
         if not selected_types:
             messages.warning(request, 'No prompt types have been selected.')
-            return context
+            return context  # vráti prázdny kontext
 
         prompts = MyPrompt.objects.filter(
             prompt_type__myprompt_type_name__in=selected_types,
@@ -100,6 +64,33 @@ def generate_custom_prompt(request):
             messages.warning(request, 'No prompts available for selected types.')
 
     return context
+
+
+@login_required
+def generate_custom_prompt(request):
+    """
+    Generovanie vlastného náhodného promptu.
+    """
+    if request.method == 'POST':
+        selected_types = request.POST.getlist('selectedTypes[]')
+
+        if not selected_types:
+            return JsonResponse({'generated_prompt': 'No prompt types have been selected.'}, status=400)
+
+        prompts = MyPrompt.objects.filter(
+            prompt_type__myprompt_type_name__in=selected_types,
+            user=request.user
+        )
+
+        if prompts.exists():
+            random_prompt = random.choice(prompts)
+            generated_prompt = f"Here is your custom prompt: {random_prompt.prompt_name}"
+            return JsonResponse({'generated_prompt': generated_prompt})
+        else:
+            return JsonResponse({'generated_prompt': 'No prompt available for selected types.'}, status=404)
+
+    return JsonResponse({'generated_prompt': 'Invalid request.'}, status=400)
+
 
 @login_required
 def add_my_prompt_type(request):
@@ -291,6 +282,7 @@ def home_view(request):
     context['filter_prompt_type'] = filter_prompt_type
 
     return render(request, 'index.html', context)
+
 
 
 
