@@ -123,8 +123,11 @@
           <div class="display-field01" id="displayField01"> {{ prompt_name }}</div>
         </div>
 
-        <div class="div0302-quickpromptfilter">
+      <!--------------- FILTERED PROMPTS ----------------->
+     <div class="div0302-quickpromptfilter">
           <h3 class="QuickPromptFilterTitle">Prompts Filter</h3>
+        <form method="post" action="{% url 'home' %}">
+               {% csrf_token %}
           <div class="QuickPromptFilterContainer">
             <div class="QuickPromptSelectBtn">
               <span class="btn-text">Select prompt types:</span>
@@ -133,48 +136,52 @@
               </span>
             </div>
             <ul class="list-items">
-              <li class="item">
-                <span class="checkbox">
-                  <i class="fa-solid fa-check check-icon"></i>
-                </span>
-                <span class="item-text">Prompts related to author</span>
-              </li>
-              <li class="item">
-                <span class="checkbox">
-                  <i class="fa-solid fa-check check-icon"></i>
-                </span>
-                <span class="item-text">Book cover prompts</span>
-              </li>
-              <li class="item">
-                <span class="checkbox">
-                  <i class="fa-solid fa-check check-icon"></i>
-                </span>
-                <span class="item-text">Genre prompts</span>
-              </li>
-              <li class="item">
-                <span class="checkbox">
-                  <i class="fa-solid fa-check check-icon"></i>
-                </span>
-                <span class="item-text">Time-related prompts</span>
-              </li>
-              <li class="item">
-                <span class="checkbox">
-                  <i class="fa-solid fa-check check-icon"></i>
-                </span>
-                <span class="item-text">Prompts related to title</span>
-              </li>
-              <li class="item">
-                <span class="checkbox">
-                  <i class="fa-solid fa-check check-icon"></i>
-                </span>
-                <span class="item-text">Other</span>
-              </li>
+                {% for prompt_type in all_prompt_types %}
+                <li class="item">
+                    <span class="checkbox">
+                        <input  type="checkbox" name="selectedTypes" value="{{ prompt_type.prompt_type_name }}">
+                    </span>
+                    <span class="item-text">{{ prompt_type.prompt_type_name }}</span>
+                </li>
+                {% endfor %}
             </ul>
           </div>
-          <button class="QuickPromptFilterGenButton">Generate prompt</button>
-          <div class="display-field02" id="displayField02">Your random line will appear here.</div>
+          <button class="QuickPromptFilterGenButton" type="submit" name="generate_filtered_prompt">Generate prompt</button>
+        </form>
+        <div class="display-field02" id="displayField02">
+             {% if filtered_prompt_name %}
+                {{ filtered_prompt_name }}
+            {% else %}
+                <p>Please select at least one prompt type to generate a prompt.</p>
+            {% endif %}
         </div>
-      </div>
+    </div>
+
+
+      <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectBtn = document.querySelector('.QuickPromptSelectBtn');
+    const listItems = document.querySelector('.list-items');
+
+    selectBtn.addEventListener('click', function() {
+        listItems.classList.toggle('visible');
+    });
+});
+</script>
+
+        <style>
+            .list-items {
+    display: none;
+    /* ďalšie štýly podľa potreby */
+}
+
+.list-items.visible {
+    display: block;
+}
+
+        </style>
+
+
 
       <!--------------------------------- MY PROPMPTS SECTION ----------------------------->
       <div class="div0302-myprompts">
@@ -313,22 +320,8 @@
         formBox.style.display = "none";
       }
     </script>
-    <script>
-      // LINES ARE JUST PLACEHOLDERS: Simulated database of lines
-      const lines = [
-        "The quick brown fox jumps over the lazy dog.",
-        "A journey of a thousand miles begins with a single step.",
-        "To be or not to be, that is the question.",
-        "All that glitters is not gold.",
-        "The only thing we have to fear is fear itself.",
-      ];
 
-      document.getElementById("fetchButton01").addEventListener("click", function () {
-        // Simulate a database query and display a random line
-        const randomLine = lines[Math.floor(Math.random() * lines.length)];
-        document.getElementById("displayField01").textContent = randomLine;
-      });
-    </script>
+
 <style>
     /*
  * Project: TBR_Place

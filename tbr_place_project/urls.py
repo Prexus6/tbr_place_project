@@ -21,11 +21,13 @@ from django.urls import path
 from django.conf.urls.static import static
 from django.conf import settings
 
+from tbr_place import utils
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('', include('tbr_place.urls')),
-    path('accounts/', include('accounts.urls')),
+    path('search-books-bytitle/<title>/', utils.search_books_by_title),
 
 ]
 

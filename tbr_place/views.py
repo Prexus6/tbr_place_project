@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from .forms import MyPromptForm, MyPromptTypeForm
-from .models import Prompt, MyPrompt, FavoriteBook, Book, MyPromptType, Reader
+from .models import Prompt, MyPrompt, FavoriteBook, Book, MyPromptType, Reader, PromptType
 import random
 from django.contrib import messages
 from .utils import save_book_from_open_library, search_books_by_title
@@ -30,6 +30,39 @@ def generate_random_prompt(request):
             'prompt_type': 'N/A'
         }
         messages.warning(request, str(e))
+
+    return context
+
+
+def generate_filtered_prompt(request):
+    """
+    Generovanie náhodného promptu na základe vybraných typov promptov.
+    """
+    context = {}
+
+    selected_types = request.POST.getlist('selectedTypes')
+
+    if not selected_types:
+        messages.warning(request, 'No prompt types have been selected.')
+        return context
+
+    prompts = Prompt.objects.filter(
+        prompt_type__prompt_type_name__in=selected_types
+    )
+
+    if prompts.exists():
+        random_prompt = random.choice(prompts)
+        context = {
+            'filtered_prompt_name': random_prompt.prompt_name,
+            'filtered_prompt_type': random_prompt.prompt_type.prompt_type_name
+        }
+        messages.success(request, 'Filtered prompt successfully generated!')
+    else:
+        context = {
+            'filtered_prompt_name': 'No prompts available for the selected types',
+            'filtered_prompt_type': 'N/A'
+        }
+        messages.warning(request, 'No prompts available for selected types.')
 
     return context
 
@@ -192,6 +225,10 @@ def home_view(request):
             result = generate_random_prompt(request)
             if isinstance(result, dict):
                 context.update(result)
+        elif 'generate_filtered_prompt' in request.POST:
+            result = generate_filtered_prompt(request)
+            if isinstance(result, dict):
+                context.update(result)
         elif 'selectedTypes[]' in request.POST:
             result = generate_custom_prompt(request)
             if isinstance(result, dict):
@@ -208,7 +245,9 @@ def home_view(request):
             result = search_books_and_handle_favorites(request)
             if isinstance(result, dict):
                 context.update(result)
+
     favorites = FavoriteBook.objects.filter(user=request.user)
+    context['all_prompt_types'] = PromptType.objects.all()
     context['favorites'] = favorites
     context['prompt_types'] = MyPromptType.objects.filter(user=request.user)
     context['prompt_form'] = MyPromptForm()

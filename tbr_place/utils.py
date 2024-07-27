@@ -4,6 +4,8 @@ import requests
 from io import BytesIO
 from django.core.files.base import ContentFile
 from django.db.utils import IntegrityError
+from django.http import JsonResponse
+
 from .models import Book, Author, Genre
 import re
 import logging
@@ -14,12 +16,12 @@ def is_valid_isbn(isbn):
     """Validate ISBN-13 format."""
     return bool(re.match(r'^\d{13}$', isbn))
 
-def search_books_by_title(title):
+def search_books_by_title(request, title):
     print(f"Searching for books with title: {title}")  # Debug print
 
     response = requests.get(f'https://openlibrary.org/search.json?title={title}')
     print(f"Response from Open Library: {response.json()}")  # Debug print
-    return response.json()
+    return JsonResponse(response.json(), safe=False)
 
 
 def save_book_from_open_library(book_info):
