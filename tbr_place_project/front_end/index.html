@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TBR Place</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  </head>
+  <body>
+    <div class="div01-nav">
+      <div class="div0101-logo">
+        <div class="logo-image">
+          <img src="Logo_charcoal.png" alt="Logo" class="Logo_charcoal" />
+        </div>
+        <p>TBR Place</p>
+      </div>
+      <div class="nav-button">
+        <button class="SignBtn" id="loginBtn" class="white-btn" onclick="login()">Log In</button>
+        <button class="SignBtn" id="registerBtn" onclick="register()">Sign Up</button>
+      </div>
+      <div class="nav-menu-btn">
+        <i class="bx bx-menu" onclick="myMenuFunction"></i>
+      </div>
+    </div>
+    <!----------------- Form Box ------------------->
+    <div class="form-box">
+      <!------------- Login Form --------------->
+      <div class="login-container" id="login">
+        <div class="top">
+          <span>Don't have an account? <a href="#" onclick="register()">Sign up</a></span>
+          <header class="header02">Log in</header>
+        </div>
+
+        <div class="input-box">
+          <input type="text" class="input-field" placeholder="Username" />
+          <i class="bx bx-user"></i>
+        </div>
+        <div class="input-box">
+          <input type="password" class="input-field" placeholder="Password" />
+          <i class="bx bx-lock-alt"></i>
+        </div>
+
+        <div class="input-box">
+          <input type="submit" class="submit" id="loginSubmit" value="Log in" />
+        </div>
+        <div class="two-col">
+          <div class="one">
+            <input type="checkbox" id="login-check" />
+            <label for="login-check"> Remember me </label>
+          </div>
+          <div class="two">
+            <label><a href="#">Forgot password?</a> </label>
+          </div>
+        </div>
+      </div>
+
+      <!------------- Registration Form --------------->
+      <div class="register-container" id="register">
+        <div class="top">
+          <span>Have an account? <a href="#" onclick="login()">Login</a></span>
+          <header class="header01">Sign up</header>
+        </div>
+
+        <div class="input-box">
+          <input type="text" class="input-field" placeholder="Username" />
+          <i class="bx bx-envelope"></i>
+        </div>
+        <div class="input-box">
+          <input type="password" class="input-field" placeholder="Password" />
+          <i class="bx bx-lock-alt"></i>
+        </div>
+        <div class="input-box02">
+          <a href="#" class="dropdown-toggle">Pick your security question ▼</a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Question 1</a></li>
+            <li><a href="#">Question 2</a></li>
+            <li><a href="#">Question 3</a></li>
+          </ul>
+        </div>
+        <div class="input-box">
+          <input type="password" class="input-field" placeholder="SecurityAnswer" />
+          <i class="bx bx-securityanswer"></i>
+        </div>
+        <div class="input-box">
+          <input type="submit" class="submit" id="registerSubmit" value="Register" />
+        </div>
+        <div class="two-col">
+          <div class="one">
+            <input type="checkbox" id="register-check" />
+            <label for="register-check"> Remember me </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!----------------------- WELCOME SECTION ----------------------------->
+    <div class="div02-intro">
+      <div class="div0201-welcome">
+        <h2 class="welcome-reader">Hi, reader!</h2>
+        <p class="find-your-book">Find your next book to read:</p>
+        <div class="div0201-mainbuttons">
+          <a href="#prompts-section" class="main-button-prompts">Generate a prompt</a>
+          <a href="#mybooks-title-id" class="main-button-books">Pick a book from your list</a>
+        </div>
+      </div>
+    </div>
+    <!------------------- PROMPTS SECTION --------------------------->
+    <!--------------- QUICK PROMPTS GENERATOR ----------------->
+    <div class="div03-prompts" id="prompts-section">
+      <div class="div0301-predefprompts">
+        <div class="QuickPromptGenerator">
+          <h3 class="QuickPromptGenTitle">Quick Prompt Generator</h3>
+               <form method="post" action="{% url 'home' %}">
+                    {% csrf_token %}
+                    <button type="submit" name="generate_prompt">Generate Random Prompt</button>
+                </form>
+                <p>{{ prompt_name }}</p>
+                <p>Type: {{ prompt_type }}</p>
+          <button class="QuickPromptGenButton" id="fetchButton01">Just click here!</button>
+
+          <div class="display-field01" id="displayField01">Your random line will appear here.</div>
+        </div>
+        <div class="div0302-quickpromptfilter">
+          <h3 class="QuickPromptFilterTitle">Prompts Filter</h3>
+          <div class="QuickPromptFilterContainer">
+            <div class="QuickPromptSelectBtn">
+              <span class="btn-text">Select prompt types:</span>
+              <span class="arrow-down">
+                <i class="fa-solid fa-chevron-down"></i>
+              </span>
+            </div>
+            <ul class="list-items">
+              <li class="item">
+                <span class="checkbox">
+                  <i class="fa-solid fa-check check-icon"></i>
+                </span>
+                <span class="item-text">Prompts related to author</span>
+              </li>
+              <li class="item">
+                <span class="checkbox">
+                  <i class="fa-solid fa-check check-icon"></i>
+                </span>
+                <span class="item-text">Book cover prompts</span>
+              </li>
+              <li class="item">
+                <span class="checkbox">
+                  <i class="fa-solid fa-check check-icon"></i>
+                </span>
+                <span class="item-text">Genre prompts</span>
+              </li>
+              <li class="item">
+                <span class="checkbox">
+                  <i class="fa-solid fa-check check-icon"></i>
+                </span>
+                <span class="item-text">Time-related prompts</span>
+              </li>
+              <li class="item">
+                <span class="checkbox">
+                  <i class="fa-solid fa-check check-icon"></i>
+                </span>
+                <span class="item-text">Prompts related to title</span>
+              </li>
+              <li class="item">
+                <span class="checkbox">
+                  <i class="fa-solid fa-check check-icon"></i>
+                </span>
+                <span class="item-text">Other</span>
+              </li>
+            </ul>
+          </div>
+          <button class="QuickPromptFilterGenButton">Generate prompt</button>
+          <div class="display-field02" id="displayField02">Your random line will appear here.</div>
+        </div>
+      </div>
+
+      <!--------------------------------- MY PROPMPTS SECTION ----------------------------->
+      <div class="div0302-myprompts">
+        <h3 class="QuickPromptGenTitle">My prompts</h3>
+      </div>
+    </div>
+
+    <!------------------------ BOOKS SECTION ---------------------------->
+
+    <div class="div04-books">
+      <div>
+        <h3 class="mybooks-title" id="mybooks-title-id">My Books</h3>
+      </div>
+      <div class="add-books">
+        <button class="seach-books" id="search-books-to-add">Search Books to add:</button>
+        <div class="display-field-search_books" id="displayFieldSearchBooks">Search Bar</div>
+      </div>
+      <div class="my-books-container">
+        <div class="list-of-mybooks">
+          <span class="btn-text-mybooks">LIST of my books:</span>
+          <span class="arrow-down-mybooks">
+            <i class="fa-solid fa-chevron-down"></i>
+          </span>
+        </div>
+        <ul class="mybooks-dynamic-list">
+          <li class="item-mybooks">
+            <span class="item-text-mybooks">Book 1</span>
+          </li>
+          <li class="item-mybooks">
+            <span class="item-text-mybooks">Book 2</span>
+          </li>
+        </ul>
+      </div>
+      <button class="generate-book-btn" id="fetchButtonBooks">Random Book Generator</button>
+      <div class="display-field03" id="displayField03">Your randomly generated book</div>
+    </div>
+    <div class="div05-footer"></div>
+    <script src="script.js"></script>
+    <script>
+      var a = document.getElementById("loginBtn");
+      var b = document.getElementById("registerBtn");
+      var x = document.getElementById("login");
+      var y = document.getElementById("register");
+
+      function register() {
+        document.querySelector(".login-container").style.transform = "translateX(-150%)";
+        document.querySelector(".register-container").style.transform = "translateX(0)";
+        a.classList.add("white-btn");
+        b.classList.remove("white-btn");
+      }
+
+      function login() {
+        document.querySelector(".login-container").style.transform = "translateX(0)";
+        document.querySelector(".register-container").style.transform = "translateX(150%)";
+        b.classList.add("white-btn");
+        a.classList.remove("white-btn");
+      }
+    </script>
+    <script>
+      document.getElementById("loginBtn").addEventListener("click", function () {
+        showForm("login");
+      });
+
+      document.getElementById("registerBtn").addEventListener("click", function () {
+        showForm("register");
+      });
+
+      document.getElementById("loginSubmit").addEventListener("click", function (event) {
+        event.preventDefault(); // Prevent default form submission
+        hideFormBox();
+      });
+
+      document.getElementById("registerSubmit").addEventListener("click", function (event) {
+        event.preventDefault(); // Prevent default form submission
+        hideFormBox();
+      });
+
+      function showForm(formType) {
+        var formBox = document.querySelector(".form-box");
+        var loginForm = document.querySelector(".login-container");
+        var registerForm = document.querySelector(".register-container");
+
+        // Show the form box
+        formBox.style.display = "flex"; // Make it visible
+
+        if (formType === "login") {
+          loginForm.style.transform = "translateX(0)";
+          registerForm.style.transform = "translateX(150%)";
+        } else if (formType === "register") {
+          loginForm.style.transform = "translateX(-150%)";
+          registerForm.style.transform = "translateX(0)";
+        }
+      }
+
+      function hideFormBox() {
+        var formBox = document.querySelector(".form-box");
+
+        // Hide the form box
+        formBox.style.display = "none";
+      }
+    </script>
+{#    <script>#}
+{#      // LINES ARE JUST PLACEHOLDERS: Simulated database of lines#}
+{#      const lines = [#}
+{#        "The quick brown fox jumps over the lazy dog.",#}
+{#        "A journey of a thousand miles begins with a single step.",#}
+{#        "To be or not to be, that is the question.",#}
+{#        "All that glitters is not gold.",#}
+{#        "The only thing we have to fear is fear itself.",#}
+{#      ];#}
+{##}
+{#      document.getElementById("fetchButton01").addEventListener("click", function () {#}
+{#        // Simulate a database query and display a random line#}
+{#        const randomLine = lines[Math.floor(Math.random() * lines.length)];#}
+{#        document.getElementById("displayField01").textContent = randomLine;#}
+{#      });#}
+{#    </script>#}
+  </body>
+</html>
