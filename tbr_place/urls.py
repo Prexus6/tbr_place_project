@@ -3,8 +3,10 @@ from django.conf.urls.static import static
 from django.urls import path
 from .views import generate_random_prompt, home_view, add_to_favorites, remove_from_favorites, add_my_prompt
 from . import views
-from django.urls import path
 
+
+from django.contrib import admin
+from django.urls import path, include
 
 urlpatterns = [
     path('', views.home_view, name='home'),
@@ -14,9 +16,10 @@ urlpatterns = [
     path('generate-custom-prompt/', views.generate_custom_prompt, name='generate_custom_prompt'),
     path('add-my-prompt/', add_my_prompt, name='add_my_prompt'),
     path('search-books/', views.search_books_and_handle_favorites, name='search_books_view'),
-
-#     moj koment
+    path('admin/', admin.site.urls),
+    path('accounts/', include('accounts.urls')),
 ]
+gs.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 if settings.DEBUG:

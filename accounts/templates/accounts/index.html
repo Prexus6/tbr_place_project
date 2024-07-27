@@ -1,313 +1,35 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TBR Place</title>
-    <script>
-      // Sample data from the database
-      const database = [
-        { type: 'Author', content: 'Item 1 of Type 1' },
-        { type: 'Cover', content: 'Item 1 of Type 2' },
-        { type: 'Time', content: 'Item 2 of Type 1' },
-        { type: 'Title', content: 'Item 1 of Type 3' },
-        { type: 'Genre', content: 'Item 2 of Type 2' },
-        { type: 'Other', content: 'Item 2 of Type 2' }
-      ];
-
-      // Function to filter data based on selected checkboxes
-      function filterData() {
-        // Get the selected types
-        const selectedTypes = Array.from(
-          document.querySelectorAll('input[type=checkbox]:checked')
-        ).map((checkbox) => checkbox.value);
-
-        // Filter the database based on selected types
-        const filteredData = database.filter((item) =>
-          selectedTypes.includes(item.type)
-        );
-
-        // Display the filtered data
-        const outputField = document.getElementById('outputField');
-        outputField.innerHTML = filteredData
-          .map((item) => item.content)
-          .join('<br>');
-      }
-
-      // Function to handle keypress events on labels
-      // Function to handle keypress events on checkboxes
-      function handleKeyPress(event) {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault(); // Prevent default action for the key
-          event.target.checked = !event.target.checked; // Toggle checkbox state
-          filterData(); // Call filterData function
-        }
-      }
-    </script>
-    <script>
-      // This function simulates fetching data from a database
-      function fetchData() {
-        // Simulated data from the database
-        const data = 'Generated text from database';
-        // Display the data in the output element
-        document.getElementById('outputField').value = data;
-      }
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
 </head>
 <body>
     <header>
         <nav>
             <div class="logo">
-                <img src="logo.png" alt="Logo" />
+                <img src="/static/logo.png" alt="Logo">
             </div>
             <div>
                 <h1>TBR Place</h1>
             </div>
             <div class="auth-buttons">
-                {% if user.is_authenticated %}
-                <p>Welcome, {{ user.username }}!</p>
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit">Logout</button>
-                </form>
-                {% else %}
-                <a href="{% url 'login' %}">Sign In</a>
+                <a href="{% url 'login' %}">Login</a>
                 <a href="{% url 'signup' %}">Sign Up</a>
+                <a href="{% url 'forgot_password' %}">Forgot Password</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}">Logout</a>
                 {% endif %}
             </div>
         </nav>
     </header>
-
-    {% if messages %}
-    <div class="messages">
-      {% for message in messages %}
-      <div class="message {{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-    {% endif %}
-
     <main>
-        <div>
-            <h2>Hi, Reader!</h2>
-            <p class="subtitle">Find your next book to read:</p>
-            <button class="go-to_prompts">Generate a prompt</button>
-            <button class="go-to_books">Pick a book from your list</button>
-        </div>
-        <div class="preDef">
-            <h3 class="pre-defined_prompts">Pre-defined Prompts</h3>
-            <br />
-            <p class="quick_prompt_generator">Quick Prompt Generator</p>
-            <br />
-            <p class="quick_prompt_generator_click">Just click the button!</p>
-            <br />
-            <button class="quick_prompt_generator_button"></button><br />
-            <output id="generatedQuickPrompt">Here comes your prompt...</output><br />
-        </div>
-        <br />
-        <div class="userDef">
-            <p class="select_our_prompt_types">Selected your prompt types first:</p>
-            <br />
-            <label><input type="checkbox" value="Author" onclick="filterData()" onkeypress="handleKeyPress(event)">Author</label>
-            <br />
-            <label><input type="checkbox" value="Genre" onclick="filterData()" onkeypress="handleKeyPress(event)">Genre</label>
-            <br />
-            <label><input type="checkbox" value="Time" onclick="filterData()" onkeypress="handleKeyPress(event)">Time</label>
-            <br />
-            <label><input type="checkbox" value="Title" onclick="filterData()" onkeypress="handleKeyPress(event)">Title</label>
-            <br />
-            <label><input type="checkbox" value="Cover" onclick="filterData()" onkeypress="handleKeyPress(event)">Cover</label>
-            <br />
-            <label><input type="checkbox" value="Other" onclick="filterData()" onkeypress="handleKeyPress(event)">Other</label>
-            <br />
-            <p class="filtered_prompt_generator_click">Now click the button!</p>
-            <br />
-            <button class="filtered_prompt_generator_button"></button><br />
-            <output id="generatedFilteredQuickPrompt">Here comes your prompt...</output>
-            <br />
-        </div>
-        <h3 class="books">Books</h3>
-        <br />
-        <div class="book-list" id="book-list">
-            <p class="list_of_books">List of my books:</p>
-            <br />
-            <!-- The DYNAMIC list of books included in the user database will be listed here with Remove and Edit buttons at the end of each line. To clarify: How to link buttons to the correct book/line? -->
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    // Simulated data (replace with actual API call)
-                    var books = [
-                        { title: 'Book 1', author: 'Author 1' },
-                        { title: 'Book 2', author: 'Author 2' },
-                        { title: 'Book 3', author: 'Author 3' }
-                    ];
-
-                    var bookList = document.getElementById('book-list');
-
-                    books.forEach(function (book) {
-                        var bookDiv = document.createElement('div');
-                        bookDiv.classList.add('book');
-
-                        var title = document.createElement('h3');
-                        title.textContent = book.title;
-
-                        var author = document.createElement('p');
-                        author.textContent = 'Author: ' + book.author;
-
-                        bookDiv.appendChild(title);
-                        bookDiv.appendChild(author);
-
-                        bookList.appendChild(bookDiv);
-                    });
-                });
-            </script>
-            <button class="remove_book">Remove</button>
-            <button class="edit_book">Edit</button>
-            <br />
-        </div>
-        <form id="bookSearchForm">
-            <label for="searchInput">Search for books:</label>
-            <input type="text" id="searchInput" name="searchInput" placeholder="Enter book title, author, etc." required />
-            <button type="submit">Search</button>
-        </form>
-        <!-- Display search results and handle API integration in JavaScript -->
-        <div id="searchResults"></div>
-
-        <script>
-            document.getElementById('bookSearchForm').addEventListener('submit', function (event) {
-                event.preventDefault(); // Prevent default form submission
-
-                // Get the search query from the input field
-                const searchQuery = document.getElementById('searchInput').value.trim();
-
-                // Construct the API request URL (Replace with your actual Amazon API endpoint)
-                const amazonApiUrl = `https://api.example.com/books/search?q=${encodeURIComponent(searchQuery)}`;
-
-                // Clear previous search results
-                const searchResultsDiv = document.getElementById('searchResults');
-                searchResultsDiv.innerHTML = '';
-
-                // Make an API request to Amazon
-                fetch(amazonApiUrl)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        // Process the response and display search results
-                        data.forEach((book) => {
-                            const bookResultDiv = document.createElement('div');
-                            bookResultDiv.classList.add('book-result');
-
-                            const title = document.createElement('h3');
-                            title.textContent = book.title;
-                            bookResultDiv.appendChild(title);
-
-                            const author = document.createElement('p');
-                            author.textContent = `Author: ${book.author}`;
-                            bookResultDiv.appendChild(author);
-
-                            const addButton = document.createElement('button');
-                            addButton.textContent = 'Add';
-                            addButton.addEventListener('click', function () {
-                                // Replace with your logic to add the book to the user's database
-                                alert(`Added ${book.title} by ${book.author} to your database!`);
-                            });
-                            bookResultDiv.appendChild(addButton);
-
-                            searchResultsDiv.appendChild(bookResultDiv);
-                        });
-                    })
-                    .catch((error) => {
-                        console.error('Error fetching data:', error);
-                        alert('Error fetching data. Please try again later.');
-                    });
-            });
-        </script>
-        <div class="filter-books">
-            <button id="toggleButton" onclick="toggleFilter()">Show Filter</button>
-            <div id="filterSection" class="hidden">
-                <h2>Filter Section</h2>
-                <!-- Add your filter fields here -->
-                <label for="filter1">Filter 1:</label>
-                <input type="text" id="filter1" name="filter1" /><br />
-                <label for="filter2">Filter 2:</label>
-                <input type="text" id="filter2" name="filter2" /><br />
-                <button type="submit">Apply Filter</button>
-            </div>
-
-            <script>
-                function toggleFilter() {
-                    var filterSection = document.getElementById('filterSection');
-                    var toggleButton = document.getElementById('toggleButton');
-
-                    if (filterSection.classList.contains('hidden')) {
-                        filterSection.classList.remove('hidden');
-                        toggleButton.textContent = 'Hide Filter';
-                    } else {
-                        filterSection.classList.add('hidden');
-                        toggleButton.textContent = 'Show Filter';
-                    }
-                }
-            </script>
-            <br />
-        </div>
-        <div class="how_many_books">
-            <label for="numberInput">How many books you wish to pick?</label><br />
-            <p class="books_max">Maximum number of books:</p>
-            <div>
-                <span id="itemCount" class="item-count">0</span>
-                <!-- JavaScript to update the item count -->
-                <script>
-                    // Example: Assuming itemCount is updated dynamically
-                    var itemCount = 100; // Replace with your dynamic data (e.g., fetched from a database)
-                    document.getElementById('itemCount').textContent = itemCount;
-                </script>
-            </div>
-
-            <input type="number" id="numberInput" name="numberInput" min="1" max="10" step="1" required />
-            <button onclick="generateBooks()" type="go">Go!</button>
-            <div id="bookList" class="hidden">
-                <h2>Your TBR</h2>
-                <ul id="books"></ul>
-            </div>
-
-            <script>
-                function generateBooks() {
-                    var numberInput = document.getElementById('numberInput').value;
-                    var bookList = document.getElementById('bookList');
-                    var booksUl = document.getElementById('books');
-
-                    // Array of sample book titles (you can replace with actual database data)
-                    var bookTitles = [
-                        'The Great Gatsby',
-                        'To Kill a Mockingbird',
-                        '1984',
-                        'Pride and Prejudice',
-                        'The Catcher in the Rye',
-                        'Jane Eyre',
-                        'Moby Dick',
-                        'The Hobbit',
-                        "Harry Potter and the Philosopher's Stone",
-                        'The Lord of the Rings'
-                    ];
-
-                    // Clear previous list
-                    booksUl.innerHTML = '';
-
-                    // Generate random books based on user input
-                    for (var i = 0; i < numberInput; i++) {
-                        var randomIndex = Math.floor(Math.random() * bookTitles.length);
-                        var bookTitle = bookTitles[randomIndex];
-                        var li = document.createElement('li');
-                        li.textContent = bookTitle;
-                        booksUl.appendChild(li);
-                    }
-
-                    // Show the book list
-                    bookList.classList.remove('hidden');
-                }
-            </script>
-        </div>
-        <div>
-            <button type="start-over">Start over</button>
-            <!-- resets the selection and return the user to Filter -->
-        </div>
+        <h2>Welcome to TBR Place</h2>
     </main>
+    <footer>
+        <p>&copy; 2024 TBR Place</p>
+    </footer>
 </body>
 </html>
