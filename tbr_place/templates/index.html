@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         </style>
 
-{#  moj komentar #}
+  moj komentar
 
       <!--------------------------------- MY PROPMPTS SECTION ----------------------------->
 
@@ -217,19 +217,20 @@ document.addEventListener('DOMContentLoaded', function() {
             </form>
         </div>
 
-    <!----- pridávanie vlastných promptov na základe vytvorených vlastných typov---->
-        <div class="div0303-add-prompt">
-            <h3 class="QuickPromptGenTitle">Add a Prompt</h3>
-            <form method="post" action="{% url 'home' %}">
-                {% csrf_token %}
-                {{ prompt_form.as_p }}
-                <label for="prompt_type">Select Prompt Type:</label>
-                <button type="submit" name="add_prompt">Add Prompt</button>
-            </form>
-        </div>
+            <!----- pridávanie vlastných promptov na základe vytvorených vlastných typov---->
+          <div class="div0303-add-prompt">
+               <div class="QuickPromptGenerator">
+                    <h3 class="QuickPromptGenTitle">Add a Prompt</h3>
+                    <form method="post" action="{% url 'add_my_prompt' %}">
+                        {% csrf_token %}
+                        {{ prompt_form.as_p }}
+                        <button type="submit" name="add_prompt">Add Prompt</button>
+                    </form>
+                </div>
+            </div>
 
           <!----- základné zobrazenie funkcionality : zoznam vlastných promptov (len tabuľkovo)+ remove / edit---->
-        <div class="div0302-myprompts">
+          <div class="div0302-myprompts">
             <h3 class="QuickPromptGenTitle">My Prompts</h3>
             <table>
             <thead>
@@ -271,24 +272,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     <!-- Generovanie vlastného promptu na základe vybraných typov -->
-    <div class="div0304-generate-prompt">
-        <h3 class="QuickPromptGenTitle">Generate Custom Prompt</h3>
-        <form id="generate-prompt-form" method="post" action="{% url 'generate_custom_prompt' %}">
-            {% csrf_token %}
-            <label for="prompt_types">Select Prompt Types:</label>
-            <select id="prompt_types" name="selectedTypes[]" multiple>
-                {% for type in prompt_types %}
-                    <option value="{{ type.myprompt_type_name }}">{{ type.myprompt_type_name }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit">Generate Prompt</button>
-        </form>
+   <div class="div03-prompts" id="prompts-section">
+    <div class="div0301-predefprompts">
+        <div class="QuickPromptGenerator">
+            <div class="div0304-generate-prompt">
+                <h3 class="QuickPromptGenTitle">Generate Custom Prompt</h3>
+                <form id="generate-prompt-form" method="post" action="{% url 'generate_custom_prompt' %}">
+                    {% csrf_token %}
+                    <label for="prompt_types">Select Prompt Types:</label>
+                    <select id="prompt_types" name="selectedTypes[]" multiple>
+                        {% for type in prompt_types %}
+                            <option value="{{ type.myprompt_type_name }}">{{ type.myprompt_type_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit">Generate Prompt</button>
+                </form>
 
-        <div class="generated-prompt">
-            <h4>Generated Prompt:</h4>
-            <p id="generated-prompt-content">{{ generated_prompt }}</p>
+                <div class="generated-prompt">
+                    <h4>Generated Prompt:</h4>
+                    <p id="generated-prompt-content">{{ generated_prompt }}</p>
+                </div>
+            </div>
         </div>
-    </div>
 
  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -316,35 +321,88 @@ $(document).ready(function() {
 
 
 
-    <!------------------------ BOOKS SECTION ---------------------------->
+<!------------------------ BOOKS SECTION ---------------------------->
 
-    <div class="div04-books">
-      <div>
-        <h3 class="mybooks-title" id="mybooks-title-id">My Books</h3>
-      </div>
-      <div class="add-books">
-        <button class="seach-books" id="search-books-to-add">Search Books to add:</button>
-        <div class="display-field-search_books" id="displayFieldSearchBooks">Search Bar</div>
-      </div>
-      <div class="my-books-container">
-        <div class="list-of-mybooks">
-          <span class="btn-text-mybooks">LIST of my books:</span>
-          <span class="arrow-down-mybooks">
-            <i class="fa-solid fa-chevron-down"></i>
-          </span>
-        </div>
-        <ul class="mybooks-dynamic-list">
-          <li class="item-mybooks">
-            <span class="item-text-mybooks">Book 1</span>
-          </li>
-          <li class="item-mybooks">
-            <span class="item-text-mybooks">Book 2</span>
-          </li>
-        </ul>
-      </div>
-      <button class="generate-book-btn" id="fetchButtonBooks">Random Book Generator</button>
-      <div class="display-field03" id="displayField03">Your randomly generated book</div>
+<div class="div04-books">
+  <div>
+    <h3 class="mybooks-title" id="mybooks-title-id">My Books</h3>
+  </div>
+  </div>
+  <div class="my-books-container">
+    <div class="list-of-mybooks">
+      <span class="btn-text-mybooks">LIST of my books:</span>
+      <span class="arrow-down-mybooks">
+        <i class="fa-solid fa-chevron-down"></i>
+      </span>
     </div>
+    <ul class="mybooks-dynamic-list">
+      <!-- List of books will be dynamically inserted here -->
+    </ul>
+  </div>
+  <button class="generate-book-btn" id="fetchButtonBooks">Random Book Generator</button>
+  <div class="display-field03" id="displayField03">Your randomly generated book</div>
+</div>
+
+    <!------ základné vyhľadávanie kníh (podľa title) ------->
+<   <div class="div0302-quickpromptfilter">
+        <h3 class="QuickPromptFilterTitle">Book Search</h3>
+        <form id="searchForm">
+            {% csrf_token %}
+            <input type="text" id="searchTitle" name="title" placeholder="Enter book title" />
+            <button type="submit">Search</button>
+        </form>
+
+        <div id="results"></div>
+        <div id="pagination"></div>
+    </div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Zabránime defaultnej akcii formulára
+
+            const title = document.getElementById('searchTitle').value;
+            fetch(`/search-books/?title=${title}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = '';
+
+                    if (data.error) {
+                        resultsDiv.innerHTML = `<p>${data.error}</p>`;
+                        return;
+                    }
+
+                    data.docs.forEach(book => {
+                        const coverUrl = book.cover_url ? `https://covers.openlibrary.org/b/id/${book.cover_url}-M.jpg` : '';
+                        resultsDiv.innerHTML += `
+                            <div>
+                                <img src="${coverUrl}" alt="${book.title} cover" />
+                                <strong>${book.title}</strong> by ${book.author_name}
+                                <p>ISBN: ${book.isbn}</p>
+                                <p>Genres: ${book.genres.join(', ')}</p>
+                            </div>
+                        `;
+                    });
+
+                    const paginationDiv = document.getElementById('pagination');
+                    paginationDiv.innerHTML = '';
+
+                    if (data.current_page > 1) {
+                        paginationDiv.innerHTML += `<a href="#" onclick="fetchBooks(${data.current_page - 1}); return false;">Previous</a> `;
+                    }
+                    if (data.current_page < data.total_pages) {
+                        paginationDiv.innerHTML += `<a href="#" onclick="fetchBooks(${data.current_page + 1}); return false;">Next</a>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('results').innerHTML = `<p>Error fetching data</p>`;
+                });
+        });
+    </script>
+
+<!------------------------ pätička---------------------------->
+
     <div class="div05-footer"></div>
     <script src="script.js"></script>
     <script>

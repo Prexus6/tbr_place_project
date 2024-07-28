@@ -1,10 +1,11 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
-from .views import generate_random_prompt, home_view, add_to_favorites, remove_from_favorites, add_my_prompt
+
+from .utils import search_books_by_title
+from .views import generate_random_prompt, home_view, remove_from_favorites, add_my_prompt
 from . import views, utils
 from django.urls import path
-
 
 urlpatterns = [
     path('', views.home_view, name='home'),
@@ -19,11 +20,11 @@ urlpatterns = [
     path('remove_prompt/<int:prompt_id>/', views.remove_prompt, name='remove_prompt'),
 
     #BOOK SEKCIA
-    path('add-to-favorites/<int:book_id>/', views.add_to_favorites, name='add_to_favorites'),
-    path('search-books/', views.search_books_and_handle_favorites, name='search_books_view'),
     path('remove-from-favorites/<int:book_id>/', views.remove_from_favorites, name='remove_from_favorites'),
-    path('search-books-bytitle/<title>/', utils.search_books_by_title),
-
+    path('add-book-to-favorites/<str:isbn>/', views.add_book_to_favorites, name='add_book_to_favorites'),
+    path('search-books-by-title/<str:title>/', utils.search_books_by_title, name='search_books_by_title'),
+    path('autocomplete-books/', utils.autocomplete_books, name='autocomplete_books'),
+    path('search-books/', search_books_by_title, name='search_books_by_title'),
 
 
 ]

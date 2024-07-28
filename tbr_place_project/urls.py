@@ -27,7 +27,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('', include('tbr_place.urls')),
-    path('search-books-bytitle/<title>/', utils.search_books_by_title),
+    # path('search-books-bytitle/<title>/', utils.search_books_by_title),
 
 ]
 

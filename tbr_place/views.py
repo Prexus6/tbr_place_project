@@ -5,7 +5,7 @@ from .forms import MyPromptForm, MyPromptTypeForm
 from .models import Prompt, MyPrompt, FavoriteBook, Book, MyPromptType, Reader, PromptType
 import random
 from django.contrib import messages
-from .utils import save_book_from_open_library, search_books_by_title
+from .utils import save_book_from_open_library, is_valid_isbn
 
 
 def generate_random_prompt(request):
@@ -111,83 +111,92 @@ def add_my_prompt_type(request):
 
 @login_required
 def add_my_prompt(request):
-    form = MyPromptForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        prompt = form.save(commit=False)
-        prompt.user = request.user
-        prompt.save()
-        messages.success(request, 'Prompt successfully added!')
-        return redirect('home')  # Redirect to home to avoid resubmission
-    elif request.method == 'POST':
-        messages.error(request, 'Form is invalid. Please correct the errors.')
+    if request.method == 'POST':
+        form = MyPromptForm(request.POST, user=request.user)  # Posielame aktuálneho používateľa
+        if form.is_valid():
+            prompt = form.save(commit=False)
+            prompt.user = request.user
+            prompt.save()
+            messages.success(request, 'Prompt successfully added!')
+            return redirect('home')  # Redirect to home to avoid resubmission
+        else:
+            messages.error(request, 'Form is invalid. Please correct the errors.')
+    else:
+        form = MyPromptForm(user=request.user)  # Posielame aktuálneho používateľa
 
     prompt_types = MyPromptType.objects.filter(user=request.user)
-    return {'prompt_form': form, 'prompt_types': prompt_types}
+    return render(request, 'index.html', {'prompt_form': form, 'prompt_types': prompt_types})
 
 
-def search_books_and_handle_favorites(request):
-    context = {}
+# def search_books_and_handle_favorites(request):
+#     context = {}
+#
+#     if request.method == 'POST':
+#         if 'title' in request.POST:
+#             title = request.POST.get('title')
+#             results = search_books_by_title(title)
+#             books = results.get('docs', [])
+#
+#             if not books:
+#                 messages.info(request, 'Žiadne knihy sa nenašli pre zadaný názov.')
+#
+#             for book_data in books:
+#                 book_info = {
+#                     "title": book_data.get('title'),
+#                     "author_name": book_data.get('author_name', [''])[0],
+#                     "genres": book_data.get('subject', []),
+#                     "isbn": book_data.get('isbn', [''])[0],
+#                     "rating": 0.0,
+#                     "cover_url": f"http://covers.openlibrary.org/b/id/{book_data.get('cover_i')}-L.jpg" if book_data.get(
+#                         'cover_i') else None
+#                 }
+#                 save_book_from_open_library(book_info)
+#
+#             context['books'] = books
+#             messages.success(request, 'Books successfully fetched and saved!')
+#         elif 'add_to_favorites' in request.POST:
+#             book_id = request.POST.get('book_id')
+#             book = get_object_or_404(Book, id=book_id)
+#             if FavoriteBook.objects.filter(user=request.user, book=book).exists():
+#                 messages.info(request, 'Túto knihu už máte v obľúbených.')
+#             else:
+#                 FavoriteBook.objects.create(user=request.user, book=book)
+#                 messages.success(request, 'Kniha bola pridaná do obľúbených.')
+#         elif 'remove_from_favorites' in request.POST:
+#             book_id = request.POST.get('book_id')
+#             book = get_object_or_404(Book, id=book_id)
+#             favorite = FavoriteBook.objects.filter(user=request.user, book=book).first()
+#             if favorite:
+#                 favorite.delete()
+#                 messages.success(request, 'Kniha bola odstránená z obľúbených.')
+#             else:
+#                 messages.info(request, 'Kniha nebola nájdená v obľúbených.')
+#
+#     favorites = FavoriteBook.objects.filter(user=request.user)
+#     context['favorites'] = favorites
+#
+#     return context
 
-    if request.method == 'POST':
-        if 'title' in request.POST:
-            title = request.POST.get('title')
-            results = search_books_by_title(title)
-            books = results.get('docs', [])
 
-            if not books:
-                messages.info(request, 'Žiadne knihy sa nenašli pre zadaný názov.')
+def add_book_to_favorites(request, isbn):
+    """ JUST UNUSERD """
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'User not authenticated'}, status=401)
 
-            for book_data in books:
-                book_info = {
-                    "title": book_data.get('title'),
-                    "author_name": book_data.get('author_name', [''])[0],
-                    "genres": book_data.get('subject', []),
-                    "isbn": book_data.get('isbn', [''])[0],
-                    "rating": 0.0,
-                    "cover_url": f"http://covers.openlibrary.org/b/id/{book_data.get('cover_i')}-L.jpg" if book_data.get(
-                        'cover_i') else None
-                }
-                save_book_from_open_library(book_info)
+    if not is_valid_isbn(isbn):
+        return JsonResponse({'error': 'Invalid ISBN format'}, status=400)
 
-            context['books'] = books
-            messages.success(request, 'Books successfully fetched and saved!')
-        elif 'add_to_favorites' in request.POST:
-            book_id = request.POST.get('book_id')
-            book = get_object_or_404(Book, id=book_id)
-            if FavoriteBook.objects.filter(user=request.user, book=book).exists():
-                messages.info(request, 'Túto knihu už máte v obľúbených.')
-            else:
-                FavoriteBook.objects.create(user=request.user, book=book)
-                messages.success(request, 'Kniha bola pridaná do obľúbených.')
-        elif 'remove_from_favorites' in request.POST:
-            book_id = request.POST.get('book_id')
-            book = get_object_or_404(Book, id=book_id)
-            favorite = FavoriteBook.objects.filter(user=request.user, book=book).first()
-            if favorite:
-                favorite.delete()
-                messages.success(request, 'Kniha bola odstránená z obľúbených.')
-            else:
-                messages.info(request, 'Kniha nebola nájdená v obľúbených.')
+    try:
+        book = Book.objects.get(isbn=isbn)
+    except Book.DoesNotExist:
+        return JsonResponse({'error': 'Book does not exist'}, status=404)
 
-    favorites = FavoriteBook.objects.filter(user=request.user)
-    context['favorites'] = favorites
+    _, created = FavoriteBook.objects.get_or_create(user=request.user, book=book)
 
-    return context
-
-
-@login_required
-def add_to_favorites(request, book_id):
-    """
-    Pridanie knihy do obľúbených.
-    """
-    print(f"Adding book with ID {book_id} to favorites")  # Debug print
-    book = get_object_or_404(Book, id=book_id)
-    if FavoriteBook.objects.filter(user=request.user, book=book).exists():
-        messages.info(request, 'Túto knihu už máte v obľúbených.')
+    if created:
+        return JsonResponse({'success': 'Book added to favorites'})
     else:
-        FavoriteBook.objects.create(user=request.user, book=book)
-        messages.success(request, 'Kniha bola pridaná do obľúbených.')
-    return redirect('home')
+        return JsonResponse({'info': 'Book already in favorites'})
 
 
 @login_required
@@ -262,17 +271,21 @@ def home_view(request):
             result = add_my_prompt_type(request)
             if isinstance(result, dict):
                 context.update(result)
-        else:
-            result = search_books_and_handle_favorites(request)
-            if isinstance(result, dict):
-                context.update(result)
+        # else:
+            # result = search_books_and_handle_favorites(request)
+            # if isinstance(result, dict):
+            #     context.update(result)
 
     favorites = FavoriteBook.objects.filter(user=request.user)
-    context['all_prompt_types'] = PromptType.objects.all()
     context['favorites'] = favorites
+    context['all_prompt_types'] = PromptType.objects.all()
+    context['prompt_form'] = MyPromptForm(user=request.user)
+
+    # Získajte prompt typy iba pre aktuálneho používateľa
     context['prompt_types'] = MyPromptType.objects.filter(user=request.user)
-    context['prompt_form'] = MyPromptForm()
     context['prompt_type_form'] = MyPromptTypeForm()
+    favorites = FavoriteBook.objects.filter(user=request.user)
+    context['favorites'] = favorites
 
     # Filtering user prompts
     user_prompts = MyPrompt.objects.filter(user=request.user)
