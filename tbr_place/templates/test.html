@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TBR Place</title>
     <link rel="stylesheet" href="styles.css" />
@@ -12,405 +14,115 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-  </head>
-  <body>
-   <!----- TODO - PRIHLASOVACIU ČASŤ Z BAKCENDU IMPLEMENTOVAŤ    ----->
-    <div class="div01-nav">
-        <nav>
-            <div>
-                <h1>TBR Place</h1>
-            </div>
-            <div class="auth-buttons">
-                {% if user.is_authenticated %}
-                <p>Welcome, {{ user.username }}!</p>
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit">Logout</button>
-                </form>
-                {% else %}
-                <a href="{% url 'login' %}">Sign In</a>
-                <a href="{% url 'signup' %}">Sign Up</a>
-                {% endif %}
-            </div>
-        </nav>
-     <!----- TODO - PRIHLASOVACIU ČASŤ Z BAKCENDU IMPLEMENTOVAŤ    ----->
+</head>
+<body>
+    <h1>Welcome to the Book and Prompt Management System</h1>
 
-      <div class="div0101-logo">
-        <div class="logo-image">
-          <img src="Logo_charcoal.png" alt="Logo" class="Logo_charcoal" />
-        </div>
-        <p>TBR Place</p>
-      </div>
-      <div class="nav-button">
-        <button class="SignBtn" id="loginBtn" class="white-btn" onclick="login()">Log In</button>
-        <button class="SignBtn" id="registerBtn" onclick="register()">Sign Up</button>
-      </div>
-      <div class="nav-menu-btn">
-        <i class="bx bx-menu" onclick="myMenuFunction"></i>
-      </div>
-    </div>
-    <!----------------- Form Box ------------------->
-    <div class="form-box">
-      <!------------- Login Form --------------->
-      <div class="login-container" id="login">
-        <div class="top">
-          <span>Don't have an account? <a href="#" onclick="register()">Sign up</a></span>
-          <header class="header02">Log in</header>
-        </div>
+    {% if user.is_authenticated %}
+        <p>Hello, {{ user.username }}!</p>
+        <a href="{% url 'logout' %}">Logout</a>
+    {% else %}
+        <a href="{% url 'login' %}">Login</a> | <a href="{% url 'signup' %}">Sign Up</a>
+    {% endif %}
 
-        <div class="input-box">
-          <input type="text" class="input-field" placeholder="Username" />
-          <i class="bx bx-user"></i>
-        </div>
-        <div class="input-box">
-          <input type="password" class="input-field" placeholder="Password" />
-          <i class="bx bx-lock-alt"></i>
-        </div>
 
-        <div class="input-box">
-          <input type="submit" class="submit" id="loginSubmit" value="Log in" />
-        </div>
-        <div class="two-col">
-          <div class="one">
-            <input type="checkbox" id="login-check" />
-            <label for="login-check"> Remember me </label>
-          </div>
-          <div class="two">
-            <label><a href="#">Forgot password?</a> </label>
-          </div>
-        </div>
-      </div>
-
-      <!------------- Registration Form --------------->
-      <div class="register-container" id="register">
-        <div class="top">
-          <span>Have an account? <a href="#" onclick="login()">Login</a></span>
-          <header class="header01">Sign up</header>
-        </div>
-
-        <div class="input-box">
-          <input type="text" class="input-field" placeholder="Username" />
-          <i class="bx bx-envelope"></i>
-        </div>
-        <div class="input-box">
-          <input type="password" class="input-field" placeholder="Password" />
-          <i class="bx bx-lock-alt"></i>
-        </div>
-        <div class="input-box02">
-          <a href="#" class="dropdown-toggle">Pick your security question ▼</a>
-          <ul class="dropdown-menu">
-            <li><a href="#">Question 1</a></li>
-            <li><a href="#">Question 2</a></li>
-            <li><a href="#">Question 3</a></li>
-          </ul>
-        </div>
-        <div class="input-box">
-          <input type="password" class="input-field" placeholder="SecurityAnswer" />
-          <i class="bx bx-securityanswer"></i>
-        </div>
-        <div class="input-box">
-          <input type="submit" class="submit" id="registerSubmit" value="Register" />
-        </div>
-        <div class="two-col">
-          <div class="one">
-            <input type="checkbox" id="register-check" />
-            <label for="register-check"> Remember me </label>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!----------------------- WELCOME SECTION ----------------------------->
-    <div class="div02-intro">
-      <div class="div0201-welcome">
-        <h2 class="welcome-reader">Hi, reader!</h2>
-        <p class="find-your-book">Find your next book to read:</p>
-        <div class="div0201-mainbuttons">
-          <a href="#prompts-section" class="main-button-prompts">Generate a prompt</a>
-          <a href="#mybooks-title-id" class="main-button-books">Pick a book from your list</a>
-        </div>
-      </div>
-    </div>
-    <!------------------- PROMPTS SECTION --------------------------->
-    <!--------------- QUICK PROMPTS GENERATOR ----------------->
-    <div class="div03-prompts" id="prompts-section">
-      <div class="div0301-predefprompts">
-        <div class="QuickPromptGenerator">
+    <div class="QuickPromptGenerator">
           <h3 class="QuickPromptGenTitle">Quick Prompt Generator</h3>
+                <p>{{ prompt_name }}</p>
+                <p>Type: {{ prompt_type }}</p>
+          <button class="QuickPromptGenButton" id="fetchButton01">Just click here!</button>
+
+          <div class="display-field01" id="displayField01">Your random line will appear here.</div>
+        </div>
+
+{#    <h2>Generated Prompt</h2>#}
+{#    <p>{{ prompt_name }}</p>#}
+{#    <p>Type: {{ prompt_type }}</p>#}
+
+    <h2>Favorite Books</h2>
+    <ul>
+        {% for favorite in favorites %}
+            <li>{{ favorite.book.title }} by {{ favorite.book.author }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Add a Prompt Type</h2>
+    <form method="post" action="{% url 'home' %}">
+        {% csrf_token %}
+        {{ prompt_type_form.as_p }}
+        <button type="submit" name="add_prompt_type">Add Prompt Type</button>
+    </form>
+
+    <h2>Add a Prompt</h2>
+    <form method="post" action="{% url 'home' %}">
+        {% csrf_token %}
+        {{ prompt_form.as_p }}
+        <label for="prompt_type">Select Prompt Type:</label>
+        <select name="prompt_type" id="prompt_type">
+            {% for type in prompt_types %}
+                <option value="{{ type.id }}">{{ type.myprompt_type_name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" name="add_prompt">Add Prompt</button>
+    </form>
+
+    <h2>Generate a Random Prompt</h2>
+    <form method="post" action="{% url 'home' %}">
+        {% csrf_token %}
+        <button type="submit" name="generate_prompt">Generate Random Prompt</button>
+    </form>
+
+    <h2>Generate a Custom Prompt</h2>
+    <form method="post" action="{% url 'home' %}">
+        {% csrf_token %}
+        {% for prompt_type in prompt_types %}
+            <input type="checkbox" name="selectedTypes[]" value="{{ prompt_type.myprompt_type_name }}">
+            {{ prompt_type.myprompt_type_name }}<br>
+        {% endfor %}
+        <button type="submit">Generate Custom Prompt</button>
+    </form>
+
+    <h2>Search Books</h2>
+    <form method="post" action="{% url 'home' %}">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="Enter book title">
+        <button type="submit">Search</button>
+    </form>
+
+    <h2>Book Results</h2>
+    <ul>
+        {% if books %}
+            {% for book in books %}
+                <li>
+                    <p>{{ book.title }} by {{ book.author_name }}</p>
+                    <img src="{{ book.cover_url }}" alt="Book cover">
+                    <form method="post" action="{% url 'home' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="book_id" value="{{ book.id }}">
+                        <button type="submit" name="add_to_favorites">Add to Favorites</button>
+                    </form>
+                </li>
+            {% endfor %}
+        {% else %}
+            <li>No books found.</li>
+        {% endif %}
+    </ul>
+
+    <h2>Favorite Books Management</h2>
+    <ul>
+        {% for favorite in favorites %}
+            <li>
+                {{ favorite.book.title }} by {{ favorite.book.author }}
                 <form method="post" action="{% url 'home' %}">
                     {% csrf_token %}
-                    <button class="QuickPromptGenButton" type="submit" name="generate_prompt">Just click here!</button>
+                    <input type="hidden" name="book_id" value="{{ favorite.book.id }}">
+                    <button type="submit" name="remove_from_favorites">Remove from Favorites</button>
                 </form>
-          <div class="display-field01" id="displayField01"> {{ prompt_name }}</div>
-        </div>
-
-      <!--------------- FILTERED PROMPTS ----------------->
-     <div class="div0302-quickpromptfilter">
-          <h3 class="QuickPromptFilterTitle">Prompts Filter</h3>
-        <form method="post" action="{% url 'home' %}">
-               {% csrf_token %}
-          <div class="QuickPromptFilterContainer">
-            <div class="QuickPromptSelectBtn">
-              <span class="btn-text">Select prompt types:</span>
-              <span class="arrow-down">
-                <i class="fa-solid fa-chevron-down"></i>
-              </span>
-            </div>
-            <ul class="list-items">
-                {% for prompt_type in all_prompt_types %}
-                <li class="item">
-                    <span class="checkbox">
-                        <input  type="checkbox" name="selectedTypes" value="{{ prompt_type.prompt_type_name }}">
-                    </span>
-                    <span class="item-text">{{ prompt_type.prompt_type_name }}</span>
-                </li>
-                {% endfor %}
-            </ul>
-          </div>
-          <button class="QuickPromptFilterGenButton" type="submit" name="generate_filtered_prompt">Generate prompt</button>
-        </form>
-        <div class="display-field02" id="displayField02">
-             {% if filtered_prompt_name %}
-                {{ filtered_prompt_name }}
-            {% else %}
-                <p>Please select at least one prompt type to generate a prompt.</p>
-            {% endif %}
-        </div>
-    </div>
-
-
-      <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const selectBtn = document.querySelector('.QuickPromptSelectBtn');
-    const listItems = document.querySelector('.list-items');
-
-    selectBtn.addEventListener('click', function() {
-        listItems.classList.toggle('visible');
-    });
-});
-</script>
-
-        <style>
-            .list-items {
-    display: none;
-    /* ďalšie štýly podľa potreby */
-}
-
-.list-items.visible {
-    display: block;
-}
-
-        </style>
-
-{#  moj komentar #}
-
-      <!--------------------------------- MY PROPMPTS SECTION ----------------------------->
-
-      <!----- pridávanie vlastných promptových štýlov---->
-      <div class="div0302-myprompts">
-            <h3 class="QuickPromptGenTitle">My prompts</h3>
-              <div class="div0302-add-prompt-type">
-            <h3 class="QuickPromptGenTitle">Add a Prompt Type</h3>
-            <form method="post" action="{% url 'home' %}">
-                {% csrf_token %}
-                {{ prompt_type_form.as_p }}
-                <button type="submit" name="add_prompt_type">Add Prompt Type</button>
-            </form>
-        </div>
-
-    <!----- pridávanie vlastných promptov na základe vytvorených vlastných typov---->
-        <div class="div0303-add-prompt">
-            <h3 class="QuickPromptGenTitle">Add a Prompt</h3>
-            <form method="post" action="{% url 'home' %}">
-                {% csrf_token %}
-                {{ prompt_form.as_p }}
-                <label for="prompt_type">Select Prompt Type:</label>
-                <button type="submit" name="add_prompt">Add Prompt</button>
-            </form>
-        </div>
-
-          <!----- základné zobrazenie funkcionality : zoznam vlastných promptov (len tabuľkovo)+ remove / edit---->
-        <div class="div0302-myprompts">
-            <h3 class="QuickPromptGenTitle">My Prompts</h3>
-            <table>
-            <thead>
-                <tr>
-                    <th>Prompt Name</th>
-                    <th>Type</th>
-                    <th>Edit</th>
-                    <th>Remove</th>
-                </tr>
-            </thead>
-                <tbody>
-                    {% for prompt in user_prompts %}
-                       <tr>
-                            <td>{{ prompt.prompt_name }}</td>
-                            <td>{{ prompt.prompt_type.myprompt_type_name }}</td>
-                            <td>
-                                <a href="{% url 'edit_prompt' prompt.id %}">Edit</a>
-                            </td>
-                            <td>
-                                <form method="post" action="{% url 'remove_prompt' prompt.id %}" style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit">Remove</button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="4">No prompts available.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-      </div>
-    </div>
-
-    </div>
-
-
-    <!-- Generovanie vlastného promptu na základe vybraných typov -->
-    <div class="div0304-generate-prompt">
-        <h3 class="QuickPromptGenTitle">Generate Custom Prompt</h3>
-        <form id="generate-prompt-form" method="post" action="{% url 'generate_custom_prompt' %}">
-            {% csrf_token %}
-            <label for="prompt_types">Select Prompt Types:</label>
-            <select id="prompt_types" name="selectedTypes[]" multiple>
-                {% for type in prompt_types %}
-                    <option value="{{ type.myprompt_type_name }}">{{ type.myprompt_type_name }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit">Generate Prompt</button>
-        </form>
-
-        <div class="generated-prompt">
-            <h4>Generated Prompt:</h4>
-            <p id="generated-prompt-content">{{ generated_prompt }}</p>
-        </div>
-    </div>
-
- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script>
-          // zabezpečené nerefreshovanie po vygenerovaní promptu  (testovať všetky verzie prehliadačov)
-$(document).ready(function() {
-    $("form#generate-prompt-form").on("submit", function(event) {
-        event.preventDefault();
-
-        $.ajax({
-            type: "POST",
-            url: $(this).attr('action'),
-            data: $(this).serialize(),
-            success: function(response) {
-                $("#generated-prompt-content").html(response.generated_prompt);
-            },
-            error: function(xhr, status, error) {
-                console.error("AJAX error:", status, error);
-            }
-        });
-    });
-});
-
-</script>
-
-
-
-    <!------------------------ BOOKS SECTION ---------------------------->
-
-    <div class="div04-books">
-      <div>
-        <h3 class="mybooks-title" id="mybooks-title-id">My Books</h3>
-      </div>
-      <div class="add-books">
-        <button class="seach-books" id="search-books-to-add">Search Books to add:</button>
-        <div class="display-field-search_books" id="displayFieldSearchBooks">Search Bar</div>
-      </div>
-      <div class="my-books-container">
-        <div class="list-of-mybooks">
-          <span class="btn-text-mybooks">LIST of my books:</span>
-          <span class="arrow-down-mybooks">
-            <i class="fa-solid fa-chevron-down"></i>
-          </span>
-        </div>
-        <ul class="mybooks-dynamic-list">
-          <li class="item-mybooks">
-            <span class="item-text-mybooks">Book 1</span>
-          </li>
-          <li class="item-mybooks">
-            <span class="item-text-mybooks">Book 2</span>
-          </li>
-        </ul>
-      </div>
-      <button class="generate-book-btn" id="fetchButtonBooks">Random Book Generator</button>
-      <div class="display-field03" id="displayField03">Your randomly generated book</div>
-    </div>
-    <div class="div05-footer"></div>
-    <script src="script.js"></script>
-    <script>
-      var a = document.getElementById("loginBtn");
-      var b = document.getElementById("registerBtn");
-      var x = document.getElementById("login");
-      var y = document.getElementById("register");
-
-      function register() {
-        document.querySelector(".login-container").style.transform = "translateX(-150%)";
-        document.querySelector(".register-container").style.transform = "translateX(0)";
-        a.classList.add("white-btn");
-        b.classList.remove("white-btn");
-      }
-
-      function login() {
-        document.querySelector(".login-container").style.transform = "translateX(0)";
-        document.querySelector(".register-container").style.transform = "translateX(150%)";
-        b.classList.add("white-btn");
-        a.classList.remove("white-btn");
-      }
-    </script>
-    <script>
-      document.getElementById("loginBtn").addEventListener("click", function () {
-        showForm("login");
-      });
-
-      document.getElementById("registerBtn").addEventListener("click", function () {
-        showForm("register");
-      });
-
-      document.getElementById("loginSubmit").addEventListener("click", function (event) {
-        event.preventDefault(); // Prevent default form submission
-        hideFormBox();
-      });
-
-      document.getElementById("registerSubmit").addEventListener("click", function (event) {
-        event.preventDefault(); // Prevent default form submission
-        hideFormBox();
-      });
-
-      function showForm(formType) {
-        var formBox = document.querySelector(".form-box");
-        var loginForm = document.querySelector(".login-container");
-        var registerForm = document.querySelector(".register-container");
-
-        // Show the form box
-        formBox.style.display = "flex"; // Make it visible
-
-        if (formType === "login") {
-          loginForm.style.transform = "translateX(0)";
-          registerForm.style.transform = "translateX(150%)";
-        } else if (formType === "register") {
-          loginForm.style.transform = "translateX(-150%)";
-          registerForm.style.transform = "translateX(0)";
-        }
-      }
-
-      function hideFormBox() {
-        var formBox = document.querySelector(".form-box");
-
-        // Hide the form box
-        formBox.style.display = "none";
-      }
-    </script>
-
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
 
 <style>
     /*
@@ -1121,6 +833,3 @@ body {
 }
 
 </style>
-
-  </body>
-</html>
