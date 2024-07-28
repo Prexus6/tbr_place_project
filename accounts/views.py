@@ -12,7 +12,7 @@ def signup_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('index')
+            return redirect('home')
         else:
             messages.error(request, 'Please correct the error below.')
     else:
@@ -26,7 +26,7 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('index')
+            return redirect('home')
         else:
             messages.error(request, 'Invalid username or password.')
     else:
@@ -38,5 +38,4 @@ def logout_view(request):
     logout(request)
     return render(request, 'accounts/logout.html')
 
-def index(request):
-    return render(request, 'accounts/index.html')
+
