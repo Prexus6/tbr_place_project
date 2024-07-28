@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Details</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .card {
+            margin: 20px;
+        }
+        .img-fluid {
+            max-width: 100%;
+            height: auto;
+        }
+        .btn-primary {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1><b>Book Details</b></h1>
+
+<div class="card" style="width: 20rem; float: right;">
+        <img src="http://covers.openlibrary.org/b/isbn/{{ book.isbn }}-L.jpg" class="img-fluid" alt="Responsive image">
+    </div>
+
+    <h3>Title: {{ book.title }}</h3>
+
+    <ul>
+        <li>Author: {{ book.author }}</li>
+        <li>Publication year: {{ book.publicationyear }}</li>
+        <li>ISBN: {{ book.isbn }}</li>
+    </ul>
+
+    <form action="{% url 'book_details' isbn=book.isbn %}" method="post">
+        {% csrf_token %}
+        <select name="rating">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        <br>
+        <textarea name="review" rows="3" cols="80" maxlength="450" placeholder="Write a review for the book here(max characters:450)"></textarea>
+        <br>
+        <button type="submit" class="btn btn-primary">Submit review</button>
+        {% if text %}
+        <div class="alert alert-success col-md-3" role="alert">
+            {{ text }}
+        </div>
+        {% endif %}
+    </form>
+
+    <h2>Reviews</h2>
+    <ul>
+        {% for review in reviews %}
+        <li>Rating: {{ review.rating }}</li>
+        <p>{{ review.text }}</p>
+        {% empty %}
+        <li>No reviews for this book yet.</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Goodreads ratings</h2>
+    <ul>
+        <li>Average rating: {{ avg_rating_Goodreads }}</li>
+        <li>{{ number_rating_Goodreads }} User reviews</li>
+    </ul>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

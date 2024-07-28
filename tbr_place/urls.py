@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.urls import path
 
 from .utils import search_books_by_title
-from .views import generate_random_prompt, home_view, remove_from_favorites, add_my_prompt
+from .views import generate_random_prompt, home_view, remove_from_favorites, add_my_prompt, book_details
 from . import views, utils
 from django.urls import path
 
@@ -25,7 +25,8 @@ urlpatterns = [
     # path('search-books-by-title/<str:title>/', utils.search_books_by_title, name='search_books_by_title'),
     # path('autocomplete-books/', utils.autocomplete_books, name='autocomplete_books'),
     path('search-books/', search_books_by_title, name='search_books_by_title'),
-
+    path('get-book-details/<str:key>/', utils.get_book_details, name='get_book_details'),
+    path('book-details/<str:isbn>/', book_details, name='book_details'),
 
 ]
 

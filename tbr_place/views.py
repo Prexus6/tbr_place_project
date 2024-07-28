@@ -7,7 +7,7 @@ import random
 from django.contrib import messages
 from .utils import  is_valid_isbn
 # save_book_from_open_library
-
+import  requests
 
 def generate_random_prompt(request):
     """
@@ -177,6 +177,56 @@ def add_my_prompt(request):
 #     context['favorites'] = favorites
 #
 #     return context
+
+
+def book_details(request, isbn):
+    """ Získajte podrobnosti o knihe podľa ISBN """
+    if not isbn:
+        return render(request, 'error.html', {'error': 'Invalid ISBN'})
+
+    try:
+        query = f'https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}&format=json&jscmd=data'
+        response = requests.get(query)
+        response.raise_for_status()
+        data = response.json()
+
+        book = data.get(f'ISBN:{isbn}', {})
+        reviews = get_reviews_for_book(isbn)
+        avg_rating_Goodreads = get_goodreads_avg_rating(isbn)
+        number_rating_Goodreads = get_goodreads_number_ratings(isbn)
+
+        context = {
+            'book': {
+                'title': book.get('title', 'No Title'),
+                'author': ', '.join(author['name'] for author in book.get('authors', [])),
+                'publicationyear': book.get('publish_date', 'No Date'),
+                'isbn': isbn,
+            },
+            'reviews': reviews,
+            'avg_rating_Goodreads': avg_rating_Goodreads,
+            'number_rating_Goodreads': number_rating_Goodreads,
+            'text': request.session.pop('text', None),
+        }
+
+        return render(request, 'book_detail.html', context)
+
+    except requests.exceptions.RequestException as e:
+        return render(request, 'error.html', {'error': str(e)})
+
+
+def get_reviews_for_book(isbn):
+    """ Získa recenzie pre knihu (implementujte podľa potreby) """
+    return []
+
+
+def get_goodreads_avg_rating(isbn):
+    """ Získa priemerné hodnotenie z Goodreads (implementujte podľa potreby) """
+    return 'N/A'
+
+
+def get_goodreads_number_ratings(isbn):
+    """ Získa počet hodnotení z Goodreads (implementujte podľa potreby) """
+    return 'N/A'
 
 
 def add_book_to_favorites(request, isbn):

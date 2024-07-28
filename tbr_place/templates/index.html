@@ -321,50 +321,57 @@ $(document).ready(function() {
 
 
 
-<!------------------------ BOOKS SECTION ---------------------------->
+<!------ základné vyhľadávanie kníh ------->
+<div class="div0302-quickpromptfilter">
+    <h3 class="QuickPromptFilterTitle">Book Search</h3>
+    <form id="searchForm">
+        {% csrf_token %}
+        <input type="text" id="searchTitle" name="title" placeholder="Enter book title" />
 
-    <div class="div04-books">
-        <div>
-            <h3 class="mybooks-title" id="mybooks-title-id">My Books</h3>
-        </div>
-    </div>
-    <div class="my-books-container">
-        <div class="list-of-mybooks">
-            <span class="btn-text-mybooks">LIST of my books:</span>
-            <span class="arrow-down-mybooks">
-                <i class="fa-solid fa-chevron-down"></i>
-            </span>
-        </div>
-        <ul class="mybooks-dynamic-list">
-            <!-- List of books will be dynamically inserted here -->
-        </ul>
-    </div>
-    <button class="generate-book-btn" id="fetchButtonBooks">Random Book Generator</button>
-    <div class="display-field03" id="displayField03">Your randomly generated book</div>
+        <label>
+            <input type="checkbox" id="filterByAuthor" name="filterByAuthor" />
+            Search by Author
+        </label>
+        <input type="text" id="searchAuthor" name="author" placeholder="Enter author name" />
 
-    <!------ základné vyhľadávanie kníh (podľa title) ------->
-    <div class="div0302-quickpromptfilter">
-        <h3 class="QuickPromptFilterTitle">Book Search</h3>
-        <form id="searchForm">
-            {% csrf_token %}
-            <input type="text" id="searchTitle" name="title" placeholder="Enter book title" />
-            <button type="submit">Search</button>
-        </form>
+        <label>
+            <input type="checkbox" id="filterByGenre" name="filterByGenre" />
+            Search by Genre
+        </label>
+        <input type="text" id="searchGenre" name="genre" placeholder="Enter genre" />
 
-        <div id="results"></div>
-        <div id="pagination"></div>
-    </div>
+        <button type="submit">Search</button>
+    </form>
+
+    <div id="results"></div>
+    <div id="pagination"></div>
+</div>
+
 
 <script>
 document.getElementById('searchForm').addEventListener('submit', function(e) {
     e.preventDefault(); // Zabránime defaultnej akcii formulára
 
     const title = document.getElementById('searchTitle').value;
-    fetchBooks(title, 1); // Načítaj prvú stránku
+    const author = document.getElementById('searchAuthor').value;
+    const genre = document.getElementById('searchGenre').value;
+    const filterByAuthor = document.getElementById('filterByAuthor').checked;
+    const filterByGenre = document.getElementById('filterByGenre').checked;
+
+    fetchBooks(title, author, genre, filterByAuthor, filterByGenre, 1); // Načítaj prvú stránku
 });
 
-function fetchBooks(title, page) {
-    fetch(`/search-books/?title=${title}&page=${page}`)
+function fetchBooks(title, author, genre, filterByAuthor, filterByGenre, page) {
+    let query = `/search-books/?title=${encodeURIComponent(title)}&page=${page}`;
+
+    if (filterByAuthor && author) {
+        query += `&author=${encodeURIComponent(author)}`;
+    }
+    if (filterByGenre && genre) {
+        query += `&genre=${encodeURIComponent(genre)}`;
+    }
+
+    fetch(query)
         .then(response => response.json())
         .then(data => {
             const resultsDiv = document.getElementById('results');
@@ -380,9 +387,10 @@ function fetchBooks(title, page) {
                 resultsDiv.innerHTML += `
                     <div>
                         <img src="${coverUrl}" alt="${book.title} cover" />
-                        <strong>${book.title}</strong> by ${book.author_name}
-                        <p>ISBN: ${book.isbn}</p>
+                        <h3>${book.title}</h3>
+                        <p>by <strong>${book.author_name}</strong></p>
                         <p>Genres: ${book.genres.join(', ')}</p>
+                        <button onclick="fetchBookDetails('${book.key}')">View Details</button>
                     </div>
                 `;
             });
@@ -391,10 +399,10 @@ function fetchBooks(title, page) {
             paginationDiv.innerHTML = '';
 
             if (data.current_page > 1) {
-                paginationDiv.innerHTML += `<a href="#" onclick="fetchBooks('${title}', ${data.current_page - 1}); return false;">Previous</a> `;
+                paginationDiv.innerHTML += `<a href="#" onclick="fetchBooks('${title}', '${author}', '${genre}', ${filterByAuthor}, ${filterByGenre}, ${data.current_page - 1}); return false;">Previous</a> `;
             }
             if (data.current_page < data.total_pages) {
-                paginationDiv.innerHTML += `<a href="#" onclick="fetchBooks('${title}', ${data.current_page + 1}); return false;">Next</a>`;
+                paginationDiv.innerHTML += `<a href="#" onclick="fetchBooks('${title}', '${author}', '${genre}', ${filterByAuthor}, ${filterByGenre}, ${data.current_page + 1}); return false;">Next</a>`;
             }
         })
         .catch(error => {
@@ -402,6 +410,17 @@ function fetchBooks(title, page) {
             document.getElementById('results').innerHTML = `<p>Error fetching data</p>`;
         });
 }
+
+function fetchBookDetails(key) {
+    if (!key) {
+        console.error('Invalid book key');
+        return;
+    }
+
+    // Presmerovanie na stránku detailu knihy
+    window.location.href = `/book-details/${encodeURIComponent(key)}/`;
+    }
+
 </script>
 
 <style>

@@ -18,13 +18,21 @@ def is_valid_isbn(isbn):
 
 
 def search_books_by_title(request):
-    """ Vyhľadávanie kníh cez title (všeobecné)"""
+    """ Vyhľadávanie kníh s možnosťou filtrovania podľa autora a žánru """
     title = request.GET.get('title', '')
+    author = request.GET.get('author', '')
+    genre = request.GET.get('genre', '')
     page = int(request.GET.get('page', 1))
     per_page = 10
 
+    query = f'https://openlibrary.org/search.json?title={title}&page={page}&limit={per_page}'
+    if author:
+        query += f'&author={author}'
+    if genre:
+        query += f'&subject={genre}'
+
     try:
-        response = requests.get(f'https://openlibrary.org/search.json?title={title}&page={page}&limit={per_page}')
+        response = requests.get(query)
         response.raise_for_status()
         data = response.json()
     except requests.exceptions.RequestException as e:
@@ -38,7 +46,8 @@ def search_books_by_title(request):
             'author_name': book.get('author_name', ['Unknown Author'])[0],
             'isbn': book.get('isbn', [''])[0] if 'isbn' in book else 'No ISBN',
             'cover_url': book.get('cover_i', ''),
-            'genres': book.get('subject', [])
+            'genres': book.get('subject', []),
+            'rating': get_book_rating(book.get('key', ''))  # Tu pridať funkciu pre získanie hodnotenia
         }
         book_list.append(book_info)
 
@@ -49,6 +58,50 @@ def search_books_by_title(request):
         {'docs': book_list, 'total_results': total_results, 'total_pages': total_pages, 'current_page': page},
         safe=False
     )
+
+
+def get_book_rating(book_key):
+    """ Získajte hodnotenie pre knihu pomocou jej kľúča (príklad pre iný API) """
+    try:
+        # Predpokladá sa, že hodnotenie je možné získať z iného API
+        response = requests.get(f'https://some-rating-api.com/book/{book_key}')
+        response.raise_for_status()
+        data = response.json()
+        return data.get('rating', 0)  # Predpokladáme, že rating je číslo
+    except requests.exceptions.RequestException:
+        return 0  # Ak sa nezískajú hodnotenia, vrátiť 0
+
+
+def get_book_details(request, key):
+    """ Získa podrobnosti o knihe podľa kľúča """
+    if not key:
+        return JsonResponse({'error': 'Invalid book key'}, status=400)
+
+    query = f'https://openlibrary.org{key}.json'
+
+    try:
+        response = requests.get(query)
+        response.raise_for_status()
+        data = response.json()
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+    if not data.get('title'):
+        return JsonResponse({'error': 'Book not found'}, status=404)
+
+    book_info = {
+        'title': data.get('title', 'No Title'),
+        'author_name': ', '.join(author['name'] for author in data.get('authors', [])),
+        'isbn': data.get('isbn_13', ['No ISBN'])[0] if 'isbn_13' in data else 'No ISBN',
+        'cover_url': data.get('cover', {}).get('large', ''),
+        'genres': data.get('subjects', []),
+        'description': data.get('description', {}).get('value', 'No Description'),
+        'publish_date': data.get('publish_date', 'No Publish Date'),
+        'number_of_pages': data.get('number_of_pages', 'No Page Count'),
+    }
+
+    return JsonResponse(book_info, safe=False)
+
 
 
 
