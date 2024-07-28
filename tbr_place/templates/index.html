@@ -323,28 +323,27 @@ $(document).ready(function() {
 
 <!------------------------ BOOKS SECTION ---------------------------->
 
-<div class="div04-books">
-  <div>
-    <h3 class="mybooks-title" id="mybooks-title-id">My Books</h3>
-  </div>
-  </div>
-  <div class="my-books-container">
-    <div class="list-of-mybooks">
-      <span class="btn-text-mybooks">LIST of my books:</span>
-      <span class="arrow-down-mybooks">
-        <i class="fa-solid fa-chevron-down"></i>
-      </span>
+    <div class="div04-books">
+        <div>
+            <h3 class="mybooks-title" id="mybooks-title-id">My Books</h3>
+        </div>
     </div>
-    <ul class="mybooks-dynamic-list">
-      <!-- List of books will be dynamically inserted here -->
-    </ul>
-  </div>
-  <button class="generate-book-btn" id="fetchButtonBooks">Random Book Generator</button>
-  <div class="display-field03" id="displayField03">Your randomly generated book</div>
-</div>
+    <div class="my-books-container">
+        <div class="list-of-mybooks">
+            <span class="btn-text-mybooks">LIST of my books:</span>
+            <span class="arrow-down-mybooks">
+                <i class="fa-solid fa-chevron-down"></i>
+            </span>
+        </div>
+        <ul class="mybooks-dynamic-list">
+            <!-- List of books will be dynamically inserted here -->
+        </ul>
+    </div>
+    <button class="generate-book-btn" id="fetchButtonBooks">Random Book Generator</button>
+    <div class="display-field03" id="displayField03">Your randomly generated book</div>
 
     <!------ základné vyhľadávanie kníh (podľa title) ------->
-<   <div class="div0302-quickpromptfilter">
+    <div class="div0302-quickpromptfilter">
         <h3 class="QuickPromptFilterTitle">Book Search</h3>
         <form id="searchForm">
             {% csrf_token %}
@@ -356,50 +355,162 @@ $(document).ready(function() {
         <div id="pagination"></div>
     </div>
 
-    <script>
-        document.getElementById('searchForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // Zabránime defaultnej akcii formulára
+<script>
+document.getElementById('searchForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Zabránime defaultnej akcii formulára
 
-            const title = document.getElementById('searchTitle').value;
-            fetch(`/search-books/?title=${title}`)
-                .then(response => response.json())
-                .then(data => {
-                    const resultsDiv = document.getElementById('results');
-                    resultsDiv.innerHTML = '';
+    const title = document.getElementById('searchTitle').value;
+    fetchBooks(title, 1); // Načítaj prvú stránku
+});
 
-                    if (data.error) {
-                        resultsDiv.innerHTML = `<p>${data.error}</p>`;
-                        return;
-                    }
+function fetchBooks(title, page) {
+    fetch(`/search-books/?title=${title}&page=${page}`)
+        .then(response => response.json())
+        .then(data => {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
 
-                    data.docs.forEach(book => {
-                        const coverUrl = book.cover_url ? `https://covers.openlibrary.org/b/id/${book.cover_url}-M.jpg` : '';
-                        resultsDiv.innerHTML += `
-                            <div>
-                                <img src="${coverUrl}" alt="${book.title} cover" />
-                                <strong>${book.title}</strong> by ${book.author_name}
-                                <p>ISBN: ${book.isbn}</p>
-                                <p>Genres: ${book.genres.join(', ')}</p>
-                            </div>
-                        `;
-                    });
+            if (data.error) {
+                resultsDiv.innerHTML = `<p>${data.error}</p>`;
+                return;
+            }
 
-                    const paginationDiv = document.getElementById('pagination');
-                    paginationDiv.innerHTML = '';
+            data.docs.forEach(book => {
+                const coverUrl = book.cover_url ? `https://covers.openlibrary.org/b/id/${book.cover_url}-M.jpg` : '';
+                resultsDiv.innerHTML += `
+                    <div>
+                        <img src="${coverUrl}" alt="${book.title} cover" />
+                        <strong>${book.title}</strong> by ${book.author_name}
+                        <p>ISBN: ${book.isbn}</p>
+                        <p>Genres: ${book.genres.join(', ')}</p>
+                    </div>
+                `;
+            });
 
-                    if (data.current_page > 1) {
-                        paginationDiv.innerHTML += `<a href="#" onclick="fetchBooks(${data.current_page - 1}); return false;">Previous</a> `;
-                    }
-                    if (data.current_page < data.total_pages) {
-                        paginationDiv.innerHTML += `<a href="#" onclick="fetchBooks(${data.current_page + 1}); return false;">Next</a>`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('results').innerHTML = `<p>Error fetching data</p>`;
-                });
+            const paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
+
+            if (data.current_page > 1) {
+                paginationDiv.innerHTML += `<a href="#" onclick="fetchBooks('${title}', ${data.current_page - 1}); return false;">Previous</a> `;
+            }
+            if (data.current_page < data.total_pages) {
+                paginationDiv.innerHTML += `<a href="#" onclick="fetchBooks('${title}', ${data.current_page + 1}); return false;">Next</a>`;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('results').innerHTML = `<p>Error fetching data</p>`;
         });
-    </script>
+}
+</script>
+
+<style>
+#results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+#results div {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    width: calc(50% - 20px); /* Dva stĺpce */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+#results img {
+    max-width: 100px;
+    max-height: 150px;
+    object-fit: cover;
+    border-radius: 4px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+#results strong {
+    display: block;
+    font-size: 1.2em;
+    margin-bottom: 5px;
+}
+
+#results p {
+    margin: 5px 0;
+}
+
+
+#pagination {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#pagination a {
+    text-decoration: none;
+    color: #007bff;
+    padding: 10px 20px;
+    margin: 0 5px;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 1em;
+}
+
+#pagination a:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+
+@media (max-width: 1200px) {
+    #results div {
+        width: calc(33.33% - 20px);
+    }
+}
+
+@media (max-width: 992px) {
+    #results div {
+        width: calc(50% - 20px);
+    }
+}
+
+@media (max-width: 768px) {
+    #results {
+        flex-direction: column;
+    }
+
+    #results div {
+        width: 100%;
+    }
+
+    #results img {
+        max-width: 80px;
+        max-height: 120px;
+    }
+}
+
+@media (max-width: 576px) {
+    #results img {
+        max-width: 60px;
+        max-height: 90px;
+    }
+
+    #results strong {
+        font-size: 1em;
+    }
+
+    #results p {
+        font-size: 0.9em;
+    }
+
+    #pagination a {
+        font-size: 0.9em;
+    }
+}
+
+
+</style>
+
 
 <!------------------------ pätička---------------------------->
 

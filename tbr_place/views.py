@@ -5,7 +5,8 @@ from .forms import MyPromptForm, MyPromptTypeForm
 from .models import Prompt, MyPrompt, FavoriteBook, Book, MyPromptType, Reader, PromptType
 import random
 from django.contrib import messages
-from .utils import save_book_from_open_library, is_valid_isbn
+from .utils import  is_valid_isbn
+# save_book_from_open_library
 
 
 def generate_random_prompt(request):

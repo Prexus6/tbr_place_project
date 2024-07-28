@@ -22,8 +22,8 @@ urlpatterns = [
     #BOOK SEKCIA
     path('remove-from-favorites/<int:book_id>/', views.remove_from_favorites, name='remove_from_favorites'),
     path('add-book-to-favorites/<str:isbn>/', views.add_book_to_favorites, name='add_book_to_favorites'),
-    path('search-books-by-title/<str:title>/', utils.search_books_by_title, name='search_books_by_title'),
-    path('autocomplete-books/', utils.autocomplete_books, name='autocomplete_books'),
+    # path('search-books-by-title/<str:title>/', utils.search_books_by_title, name='search_books_by_title'),
+    # path('autocomplete-books/', utils.autocomplete_books, name='autocomplete_books'),
     path('search-books/', search_books_by_title, name='search_books_by_title'),
 
 

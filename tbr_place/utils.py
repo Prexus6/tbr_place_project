@@ -24,7 +24,7 @@ def search_books_by_title(request):
     per_page = 10
 
     try:
-        response = requests.get(f'https://openlibrary.org/search.json?title={title}&page={page}')
+        response = requests.get(f'https://openlibrary.org/search.json?title={title}&page={page}&limit={per_page}')
         response.raise_for_status()
         data = response.json()
     except requests.exceptions.RequestException as e:
@@ -51,53 +51,54 @@ def search_books_by_title(request):
     )
 
 
-def search_books_by_isbn(request, isbn):
-    """Vyhľadaávanie cez ISBN"""
-    print(f"Searching for book with ISBN: {isbn}")  # Debug print
 
-    if not is_valid_isbn(isbn):
-        return JsonResponse({'error': 'Invalid ISBN format'}, status=400)
+# def search_books_by_isbn(request, isbn):
+#     """Vyhľadaávanie cez ISBN"""
+#     print(f"Searching for book with ISBN: {isbn}")  # Debug print
+#
+#     if not is_valid_isbn(isbn):
+#         return JsonResponse({'error': 'Invalid ISBN format'}, status=400)
+#
+#     response = requests.get(f'https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}&format=json&jscmd=data')
+#     print(f"Response from Open Library: {response.json()}")  # Debug print
+#
+#     book_data = response.json().get(f'ISBN:{isbn}', {})
+#
+#     if book_data:
+#         book_info = {
+#             'title': book_data.get('title', 'No Title'),
+#             'author_name': book_data.get('authors', [{}])[0].get('name', 'Unknown Author'),
+#             'isbn': isbn,
+#             'rating': book_data.get('rating', 'No Rating'),
+#             'cover_url': book_data.get('cover', {}).get('large', 'No Cover'),
+#             'genres': [genre for genre in book_data.get('subjects', [])]
+#         }
+#     else:
+#         book_info = {'error': 'Book not found'}
+#
+#     return JsonResponse(book_info, safe=False)
 
-    response = requests.get(f'https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}&format=json&jscmd=data')
-    print(f"Response from Open Library: {response.json()}")  # Debug print
+# def autocomplete_books(request):
+#     """Auto-doplňovanie výsledkov."""
+#     term = request.GET.get('term', '')
+#     if not term:
+#         return JsonResponse([], safe=False)
+#
+#     response = requests.get(f'https://openlibrary.org/search.json?q={term}')
+#     data = response.json()
+#     books = data.get('docs', [])
+#
+#     suggestions = []
+#     for book in books:
+#         title = book.get('title', 'No Title')
+#         author = book.get('author_name', ['Unknown Author'])[0]
+#         isbn = book.get('isbn', [''])[0] if 'isbn' in book else 'No ISBN'
+#         suggestions.append({
+#             'label': f"{title} by {author}",
+#             'value': isbn
+#         })
 
-    book_data = response.json().get(f'ISBN:{isbn}', {})
-
-    if book_data:
-        book_info = {
-            'title': book_data.get('title', 'No Title'),
-            'author_name': book_data.get('authors', [{}])[0].get('name', 'Unknown Author'),
-            'isbn': isbn,
-            'rating': book_data.get('rating', 'No Rating'),
-            'cover_url': book_data.get('cover', {}).get('large', 'No Cover'),
-            'genres': [genre for genre in book_data.get('subjects', [])]
-        }
-    else:
-        book_info = {'error': 'Book not found'}
-
-    return JsonResponse(book_info, safe=False)
-
-def autocomplete_books(request):
-    """Auto-doplňovanie výsledkov."""
-    term = request.GET.get('term', '')
-    if not term:
-        return JsonResponse([], safe=False)
-
-    response = requests.get(f'https://openlibrary.org/search.json?q={term}')
-    data = response.json()
-    books = data.get('docs', [])
-
-    suggestions = []
-    for book in books:
-        title = book.get('title', 'No Title')
-        author = book.get('author_name', ['Unknown Author'])[0]
-        isbn = book.get('isbn', [''])[0] if 'isbn' in book else 'No ISBN'
-        suggestions.append({
-            'label': f"{title} by {author}",
-            'value': isbn
-        })
-
-    return JsonResponse(suggestions, safe=False)
+    # return JsonResponse(suggestions, safe=False)
 
 
 def save_book_from_open_library(book_info):
