@@ -13,7 +13,7 @@ def signup_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('index')
+            return redirect('home')
     else:
         form = CustomUserCreationForm()
     return render(request, 'accounts/signup.html', {'form': form})
@@ -29,7 +29,7 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, f'You have successfully logged in as {username}.')
-                return redirect('index')
+                return redirect('home')
             else:
                 messages.error(request, 'Invalid username or password.')
     else:
@@ -118,6 +118,4 @@ def reset_password_view(request):
         form = SetNewPasswordForm()
     return render(request, 'accounts/reset_password.html', {'form': form, 'username': user.username})
 
-def index_view(request):
-    username = request.user.username if request.user.is_authenticated else None
-    return render(request, 'index.html', {'username': username})
+
