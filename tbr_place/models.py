@@ -1,53 +1,48 @@
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.db.models import Sum
+
+from accounts.models import CustomUser
+
 
 class PromptType(models.Model):
     """
     Model predstavujúci preddefinované typy promptov.
+
+    Atribúty:
+        prompt_type_name (CharField): Názov typu promptu.
     """
     prompt_type_name = models.CharField(max_length=250, blank=False, null=False)
 
     def __str__(self):
         return self.prompt_type_name
 
-    def clean(self):
-        if not self.prompt_type_name:
-            raise ValidationError('Prompt type name cannot be empty')
-        if len(self.prompt_type_name) > 250:
-            raise ValidationError('Prompt type name cannot exceed 250 characters')
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)
-
 
 class Prompt(models.Model):
     """
     Model predstavujúci prompt.
+
+    Atribúty:
+        prompt_name (TextField): Názov / obsah promptu.
+        prompt_type (ForeignKey): Typ promptu, referencuje PromptType.
     """
-    prompt_name = models.TextField(blank=False, null=False)
+    prompt_name = models.TextField(250, blank=False, null=False)
     prompt_type = models.ForeignKey(PromptType, on_delete=models.CASCADE, related_name='prompts')
 
     def __str__(self):
         return self.prompt_name
 
-    def clean(self):
-        if not self.prompt_name:
-            raise ValidationError('Prompt name cannot be empty')
-        if not self.prompt_type:
-            raise ValidationError('Prompt type cannot be null')
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)
-
 
 class Author(models.Model):
     """
     Model predstavujúci autora.
+
+    Atribúty:
+        author_name (TextField): Meno autora.
     """
-    author_name = models.TextField(unique=True, blank=False, null=False)
+    author_name = models.TextField(unique=True)  # Meno autora musí byť jedinečné
 
     def __str__(self):
         return self.author_name
@@ -56,8 +51,11 @@ class Author(models.Model):
 class Genre(models.Model):
     """
     Model predstavujúci žáner.
+
+    Atribúty:
+        genre_name (TextField): Názov žánru.
     """
-    genre_name = models.TextField(unique=True, blank=False, null=False)
+    genre_name = models.TextField(unique=True)  # Názov žánru musí byť jedinečný
 
     def __str__(self):
         return self.genre_name
@@ -66,23 +64,46 @@ class Genre(models.Model):
 class Book(models.Model):
     """
     Model predstavujúci knihu.
+
+    Atribúty:
+        book_title (TextField): Názov knihy.
+        book_author (ForeignKey): Autor knihy, referencuje Author.
+        book_genre (ManyToManyField): Žánre knihy, referencuje Genre.
+        book_rating (FloatField): Hodnotenie knihy.
+        book_cover (ImageField): Obrázok obalu knihy.
+        isbn (CharField): ISBN knihy (pre integráciu s Amazon API).
     """
-    book_title = models.TextField(blank=False, null=False)
+    book_title = models.TextField()
     book_author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='books')
     book_genre = models.ManyToManyField(Genre, related_name='books')
     book_rating = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
-    book_cover = models.ImageField(upload_to='book_covers/', blank=True, null=True)
-    isbn = models.CharField(max_length=13, unique=True, blank=False, null=False)
+    book_cover = models.ImageField(upload_to='book_covers/')
+    isbn = models.CharField(max_length=13, unique=True, validators=[MinLengthValidator(13)])
 
     def __str__(self):
         return self.book_title
 
 
+class FavoriteBook(models.Model):
+    """Model predstavujúci obľúbené knihy používateľov."""
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='favorite_books')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='favorited_by')
+
+    class Meta:
+        unique_together = ('user', 'book')
+
+    def __str__(self):
+        return f"{self.user.username}'s favorite: {self.book.book_title}"
+
+
 class Reader(models.Model):
     """
     Model predstavujúci čitateľa.
+
+    Atribúty:
+        user_id (IntegerField): ID čitateľa.
     """
-    user_id = models.IntegerField(unique=True, blank=False, null=False)
+    user_id = models.IntegerField(unique=True)
 
     def __str__(self):
         return f'Čitateľ {self.user_id}'
@@ -91,40 +112,64 @@ class Reader(models.Model):
 class MyPromptType(models.Model):
     """
     Model predstavujúci užívateľom definovaný typ promptu.
-    """
-    myprompt_type_name = models.CharField(max_length=255, blank=False, null=False)
-    reader = models.ForeignKey(Reader, on_delete=models.CASCADE, related_name='myprompt_types')
 
-    class Meta:
-        unique_together = ('myprompt_type_name', 'reader')
+    Atribúty:
+        myprompt_type_name (CharField): Názov užívateľom definovaného typu promptu.
+        reader (ForeignKey): Čitateľ spojený s týmto typom promptu, referencuje Reader.
+    """
+    myprompt_type_name = models.CharField(max_length=255)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.myprompt_type_name
-
-    def clean(self):
-        if not self.myprompt_type_name:
-            raise ValidationError('MyPromptType name cannot be empty')
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)
 
 
 class MyPrompt(models.Model):
     """
     Model predstavujúci užívateľom definovaný prompt.
+
+    Atribúty:
+        prompt_name (TextField): Názov / obsah užívateľom definovaného promptu.
+        prompt_type (ForeignKey): Typ promptu, referencuje PromptType.
+        reader (ForeignKey): Čitateľ spojený s týmto promptom, referencuje Reader.
     """
-    prompt_name = models.TextField(blank=False, null=False)
+    prompt_name = models.TextField()
     prompt_type = models.ForeignKey(MyPromptType, on_delete=models.CASCADE, related_name='my_prompts')
-    reader = models.ForeignKey(Reader, on_delete=models.CASCADE, related_name='my_prompts')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.prompt_name
 
-    def clean(self):
-        if not self.prompt_name:
-            raise ValidationError('MyPrompt name cannot be empty')
 
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)
+class Quote(models.Model):
+    text = models.TextField()
+    author = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'"{self.text}" – {self.author}'
+
+
+class ReadingGoal(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    goal_name = models.CharField(max_length=100)
+    target_amount = models.PositiveIntegerField()
+    current_amount = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.goal_name} - {self.user}"
+
+    def progress_percentage(self):
+        total_progress = ReadingProgress.objects.filter(goal=self).aggregate(Sum('amount'))['amount__sum'] or 0
+        if self.target_amount > 0:
+            percentage = (total_progress / self.target_amount) * 100
+            return min(percentage, 100)
+        return 0
+
+
+class ReadingProgress(models.Model):
+    goal = models.ForeignKey(ReadingGoal, on_delete=models.CASCADE)
+    date = models.DateField()
+    amount = models.PositiveIntegerField()  # Napr. počet strán, hodín
+
+    def __str__(self):
+        return f"{self.goal.goal_name} - {self.date}: {self.amount}"
