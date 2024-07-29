@@ -1,3 +1,4 @@
+import os
 from urllib import request
 
 import requests
@@ -47,8 +48,12 @@ def search_books_by_title(request):
             'isbn': book.get('isbn', [''])[0] if 'isbn' in book else 'No ISBN',
             'cover_url': book.get('cover_i', ''),
             'genres': book.get('subject', []),
-            'rating': get_book_rating(book.get('key', ''))  # Tu pridať funkciu pre získanie hodnotenia
+            'rating': get_book_rating(book.get('key', ''))
         }
+
+
+        save_book_from_open_library(book_info)
+
         book_list.append(book_info)
 
     total_results = data.get('numFound', 0)
@@ -60,16 +65,91 @@ def search_books_by_title(request):
     )
 
 
-def get_book_rating(book_key):
-    """ Získajte hodnotenie pre knihu pomocou jej kľúča (príklad pre iný API) """
-    try:
-        # Predpokladá sa, že hodnotenie je možné získať z iného API
-        response = requests.get(f'https://some-rating-api.com/book/{book_key}')
-        response.raise_for_status()
-        data = response.json()
-        return data.get('rating', 0)  # Predpokladáme, že rating je číslo
-    except requests.exceptions.RequestException:
-        return 0  # Ak sa nezískajú hodnotenia, vrátiť 0
+def save_book_from_open_library(book_info):
+    """
+    Uloží knihu z údajov získaných z Open Library do databázy.
+    """
+    if not book_info['author_name']:
+        print(f"Ignoring book without author: {book_info}")
+        return
+
+    if not book_info['isbn'] or book_info['isbn'] == 'No ISBN':
+        print(f"Ignoring book with invalid ISBN: {book_info}")
+        return
+
+    author = get_or_create_author(book_info['author_name'])
+
+    cover_url = book_info.get('cover_url', '')
+    book_cover = download_image(cover_url) if cover_url else None
+
+    book, created = Book.objects.get_or_create(
+        isbn=book_info['isbn'],
+        defaults={
+            'book_title': book_info['title'],
+            'book_author': author,
+            'book_rating': book_info.get('rating', 'No Rating'),
+            'book_cover': book_cover,
+        }
+    )
+
+    if not created:
+        book.book_title = book_info['title']
+        book.book_author = author
+        book.book_rating = book_info.get('rating', 'No Rating')
+        book.book_cover = book_cover
+        book.save()
+        print(f"Updated existing book: {book}")
+    else:
+        print(f"Created new book: {book}")
+
+    update_genres(book, book_info['genres'])
+
+
+def download_image(url):
+    """
+    Stiahne obrázok z danej URL a vráti jeho názov súboru.
+    """
+    if isinstance(url, str) and url.strip():
+        if not url.startswith('http://') and not url.startswith('https://'):
+            url = f'https://covers.openlibrary.org/b/id/{url}-L.jpg'
+
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            image_name = url.split('/')[-1]
+            image_path = os.path.join('media', 'book_covers', image_name)
+
+            os.makedirs(os.path.dirname(image_path), exist_ok=True)
+
+            with open(image_path, 'wb') as f:
+                f.write(response.content)
+
+            return f'book_covers/{image_name}'
+        except requests.exceptions.RequestException as e:
+            print(f"Error downloading image: {e}")
+            return None
+    else:
+        print(f"Invalid URL type or empty URL: {url}")
+        return None
+
+
+def get_or_create_author(author_name):
+    """
+    Získa existujúceho autora alebo vytvorí nového na základe mena.
+    """
+    if author_name:
+        author, created = Author.objects.get_or_create(author_name=author_name)
+        return author
+    return None
+
+def update_genres(book, genres):
+    """
+    Uloží alebo aktualizuje žánre knihy.
+    """
+    for genre_name in genres:
+        genre, created = Genre.objects.get_or_create(genre_name=genre_name)
+        book.book_genre.add(genre)
+
 
 
 def get_book_details(request, key):
@@ -104,104 +184,14 @@ def get_book_details(request, key):
 
 
 
+def get_book_rating(book_key):
+    """ Získajte hodnotenie pre knihu pomocou jej kľúča (príklad pre iný API) """
+    try:
 
-# def search_books_by_isbn(request, isbn):
-#     """Vyhľadaávanie cez ISBN"""
-#     print(f"Searching for book with ISBN: {isbn}")  # Debug print
-#
-#     if not is_valid_isbn(isbn):
-#         return JsonResponse({'error': 'Invalid ISBN format'}, status=400)
-#
-#     response = requests.get(f'https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}&format=json&jscmd=data')
-#     print(f"Response from Open Library: {response.json()}")  # Debug print
-#
-#     book_data = response.json().get(f'ISBN:{isbn}', {})
-#
-#     if book_data:
-#         book_info = {
-#             'title': book_data.get('title', 'No Title'),
-#             'author_name': book_data.get('authors', [{}])[0].get('name', 'Unknown Author'),
-#             'isbn': isbn,
-#             'rating': book_data.get('rating', 'No Rating'),
-#             'cover_url': book_data.get('cover', {}).get('large', 'No Cover'),
-#             'genres': [genre for genre in book_data.get('subjects', [])]
-#         }
-#     else:
-#         book_info = {'error': 'Book not found'}
-#
-#     return JsonResponse(book_info, safe=False)
-
-# def autocomplete_books(request):
-#     """Auto-doplňovanie výsledkov."""
-#     term = request.GET.get('term', '')
-#     if not term:
-#         return JsonResponse([], safe=False)
-#
-#     response = requests.get(f'https://openlibrary.org/search.json?q={term}')
-#     data = response.json()
-#     books = data.get('docs', [])
-#
-#     suggestions = []
-#     for book in books:
-#         title = book.get('title', 'No Title')
-#         author = book.get('author_name', ['Unknown Author'])[0]
-#         isbn = book.get('isbn', [''])[0] if 'isbn' in book else 'No ISBN'
-#         suggestions.append({
-#             'label': f"{title} by {author}",
-#             'value': isbn
-#         })
-
-    # return JsonResponse(suggestions, safe=False)
-
-
-def save_book_from_open_library(book_info):
-    """
-    Uloží knihu z údajov získaných z Open Library do databázy.
-    """
-    if not book_info['author_name']:
-        print(f"Ignoring book without author: {book_info}")
-        return
-
-    author = get_or_create_author(book_info['author_name'])
-
-    book, created = Book.objects.get_or_create(
-        isbn=book_info['isbn'],
-        defaults={
-            'book_title': book_info['title'],
-            'book_author': author,
-            'book_rating': book_info['rating'],
-            'book_cover': book_info['cover_url'],
-        }
-    )
-
-    if not created:
-        book.book_title = book_info['title']
-        book.book_author = author
-        book.book_rating = book_info['rating']
-        book.book_cover = book_info['cover_url']
-        book.save()
-        print(f"Updated existing book: {book}")  # Debug print
-    else:
-        print(f"Created new book: {book}")  # Debug print
-
-    update_genres(book, book_info['genres'])
-
-def get_or_create_author(author_name):
-    """
-    Získa existujúceho autora alebo vytvorí nového na základe mena.
-    """
-    if author_name:
-        author, created = Author.objects.get_or_create(author_name=author_name)
-        return author
-    return None
-
-def update_genres(book, genres):
-    """
-    Uloží alebo aktualizuje žánre knihy.
-    """
-    for genre_name in genres:
-        genre, created = Genre.objects.get_or_create(name=genre_name)
-        book.book_genre.add(genre)
-
-
+        response = requests.get(f'https://some-rating-api.com/book/{book_key}')
+        response.raise_for_status()
+        data = response.json()
+        return data.get('rating', 0)
+    except requests.exceptions.RequestException:
+        return 0
 

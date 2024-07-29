@@ -2,6 +2,8 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.db.models import Sum
+
 from accounts.models import CustomUser
 
 
@@ -137,3 +139,37 @@ class MyPrompt(models.Model):
 
     def __str__(self):
         return self.prompt_name
+
+
+class Quote(models.Model):
+    text = models.TextField()
+    author = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'"{self.text}" – {self.author}'
+
+
+class ReadingGoal(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    goal_name = models.CharField(max_length=100)
+    target_amount = models.PositiveIntegerField()
+    current_amount = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.goal_name} - {self.user}"
+
+    def progress_percentage(self):
+        total_progress = ReadingProgress.objects.filter(goal=self).aggregate(Sum('amount'))['amount__sum'] or 0
+        if self.target_amount > 0:
+            percentage = (total_progress / self.target_amount) * 100
+            return min(percentage, 100)
+        return 0
+
+
+class ReadingProgress(models.Model):
+    goal = models.ForeignKey(ReadingGoal, on_delete=models.CASCADE)
+    date = models.DateField()
+    amount = models.PositiveIntegerField()  # Napr. počet strán, hodín
+
+    def __str__(self):
+        return f"{self.goal.goal_name} - {self.date}: {self.amount}"

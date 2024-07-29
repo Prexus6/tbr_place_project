@@ -24,12 +24,12 @@ from django.conf import settings
 from tbr_place import utils
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('', include('tbr_place.urls')),
-    # path('search-books-bytitle/<title>/', utils.search_books_by_title),
+                  path("admin/", admin.site.urls),
+                  path('accounts/', include('accounts.urls')),
+                  path('', include('tbr_place.urls')),
+                  # path('search-books-bytitle/<title>/', utils.search_books_by_title),
 
-]
+              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

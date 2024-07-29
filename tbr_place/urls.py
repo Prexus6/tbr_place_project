@@ -3,7 +3,8 @@ from django.conf.urls.static import static
 from django.urls import path
 
 from .utils import search_books_by_title
-from .views import generate_random_prompt, home_view, remove_from_favorites, add_my_prompt, book_details
+from .views import generate_random_prompt, home_view, remove_from_favorites, add_my_prompt,  \
+    add_to_my_books, get_my_books, random_quote, goal_list, update_goal
 from . import views, utils
 from django.urls import path
 
@@ -21,14 +22,18 @@ urlpatterns = [
 
     #BOOK SEKCIA
     path('remove-from-favorites/<int:book_id>/', views.remove_from_favorites, name='remove_from_favorites'),
-    path('add-book-to-favorites/<str:isbn>/', views.add_book_to_favorites, name='add_book_to_favorites'),
+    # path('add-to-my-books/', views.add_to_my_books, name='add_to_my_books'),
     # path('search-books-by-title/<str:title>/', utils.search_books_by_title, name='search_books_by_title'),
     # path('autocomplete-books/', utils.autocomplete_books, name='autocomplete_books'),
     path('search-books/', search_books_by_title, name='search_books_by_title'),
-    path('get-book-details/<str:key>/', utils.get_book_details, name='get_book_details'),
-    path('book-details/<str:isbn>/', book_details, name='book_details'),
+    path('add-to-my-books/', add_to_my_books, name='add_to_my_books'),
+    path('my-books/', get_my_books, name='get_my_books'),
 
-]
+    path('random-quote/', random_quote, name='random_quote'),
+    path('goals/', goal_list, name='goal_list'),
+    path('update-goal/<int:id>/', update_goal, name='update_goal'),
+
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
 if settings.DEBUG:

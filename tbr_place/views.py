@@ -1,13 +1,20 @@
+from datetime import datetime
+
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.views.decorators.csrf import csrf_exempt
 from .forms import MyPromptForm, MyPromptTypeForm
-from .models import Prompt, MyPrompt, FavoriteBook, Book, MyPromptType, Reader, PromptType
+from .models import Prompt, MyPrompt, FavoriteBook, Book, MyPromptType, Reader, PromptType, Quote, ReadingGoal, \
+    ReadingProgress
 import random
 from django.contrib import messages
 from .utils import  is_valid_isbn
 # save_book_from_open_library
 import  requests
+import json
+from datetime import date
 
 def generate_random_prompt(request):
     """
@@ -129,125 +136,59 @@ def add_my_prompt(request):
     return render(request, 'index.html', {'prompt_form': form, 'prompt_types': prompt_types})
 
 
-# def search_books_and_handle_favorites(request):
-#     context = {}
-#
-#     if request.method == 'POST':
-#         if 'title' in request.POST:
-#             title = request.POST.get('title')
-#             results = search_books_by_title(title)
-#             books = results.get('docs', [])
-#
-#             if not books:
-#                 messages.info(request, 'Žiadne knihy sa nenašli pre zadaný názov.')
-#
-#             for book_data in books:
-#                 book_info = {
-#                     "title": book_data.get('title'),
-#                     "author_name": book_data.get('author_name', [''])[0],
-#                     "genres": book_data.get('subject', []),
-#                     "isbn": book_data.get('isbn', [''])[0],
-#                     "rating": 0.0,
-#                     "cover_url": f"http://covers.openlibrary.org/b/id/{book_data.get('cover_i')}-L.jpg" if book_data.get(
-#                         'cover_i') else None
-#                 }
-#                 save_book_from_open_library(book_info)
-#
-#             context['books'] = books
-#             messages.success(request, 'Books successfully fetched and saved!')
-#         elif 'add_to_favorites' in request.POST:
-#             book_id = request.POST.get('book_id')
-#             book = get_object_or_404(Book, id=book_id)
-#             if FavoriteBook.objects.filter(user=request.user, book=book).exists():
-#                 messages.info(request, 'Túto knihu už máte v obľúbených.')
-#             else:
-#                 FavoriteBook.objects.create(user=request.user, book=book)
-#                 messages.success(request, 'Kniha bola pridaná do obľúbených.')
-#         elif 'remove_from_favorites' in request.POST:
-#             book_id = request.POST.get('book_id')
-#             book = get_object_or_404(Book, id=book_id)
-#             favorite = FavoriteBook.objects.filter(user=request.user, book=book).first()
-#             if favorite:
-#                 favorite.delete()
-#                 messages.success(request, 'Kniha bola odstránená z obľúbených.')
-#             else:
-#                 messages.info(request, 'Kniha nebola nájdená v obľúbených.')
-#
-#     favorites = FavoriteBook.objects.filter(user=request.user)
-#     context['favorites'] = favorites
-#
-#     return context
 
 
-def book_details(request, isbn):
-    """ Získajte podrobnosti o knihe podľa ISBN """
-    if not isbn:
-        return render(request, 'error.html', {'error': 'Invalid ISBN'})
+@login_required
+@csrf_exempt
+def add_to_my_books(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            isbn = data.get('isbn')
+            print(f'Received ISBN: {isbn}')  # Debugovanie
+            if not isbn:
+                return JsonResponse({'success': False, 'message': 'ISBN is missing.'})
 
-    try:
-        query = f'https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}&format=json&jscmd=data'
-        response = requests.get(query)
-        response.raise_for_status()
-        data = response.json()
+            book = Book.objects.get(isbn=isbn)
+            print(f'Found book: {book}')  # Debugovanie
+            user = request.user
 
-        book = data.get(f'ISBN:{isbn}', {})
-        reviews = get_reviews_for_book(isbn)
-        avg_rating_Goodreads = get_goodreads_avg_rating(isbn)
-        number_rating_Goodreads = get_goodreads_number_ratings(isbn)
+            if FavoriteBook.objects.filter(user=user, book=book).exists():
+                return JsonResponse({'success': False, 'message': 'Book already in your collection.'})
 
-        context = {
-            'book': {
-                'title': book.get('title', 'No Title'),
-                'author': ', '.join(author['name'] for author in book.get('authors', [])),
-                'publicationyear': book.get('publish_date', 'No Date'),
-                'isbn': isbn,
-            },
-            'reviews': reviews,
-            'avg_rating_Goodreads': avg_rating_Goodreads,
-            'number_rating_Goodreads': number_rating_Goodreads,
-            'text': request.session.pop('text', None),
-        }
+            FavoriteBook.objects.create(user=user, book=book)
+            return JsonResponse({'success': True})
+        except Book.DoesNotExist:
+            print('Book not found exception')
+            return JsonResponse({'success': False, 'message': 'Book not found.'})
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'message': 'Invalid JSON data.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
 
-        return render(request, 'book_detail.html', context)
-
-    except requests.exceptions.RequestException as e:
-        return render(request, 'error.html', {'error': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
-def get_reviews_for_book(isbn):
-    """ Získa recenzie pre knihu (implementujte podľa potreby) """
-    return []
 
 
-def get_goodreads_avg_rating(isbn):
-    """ Získa priemerné hodnotenie z Goodreads (implementujte podľa potreby) """
-    return 'N/A'
+@login_required
+def get_my_books(request):
+    user = request.user
+    favorite_books = FavoriteBook.objects.filter(user=user)
+    book_list = []
 
+    for favorite in favorite_books:
+        book = favorite.book
+        book_list.append({
+            'title': book.book_title,
+            'author': book.book_author.author_name,
+            'isbn': book.isbn,
+            'cover_url': book.book_cover.url if book.book_cover else '',
+            'rating': book.book_rating,
+        })
 
-def get_goodreads_number_ratings(isbn):
-    """ Získa počet hodnotení z Goodreads (implementujte podľa potreby) """
-    return 'N/A'
+    return JsonResponse({'books': book_list}, safe=False)
 
-
-def add_book_to_favorites(request, isbn):
-    """ JUST UNUSERD """
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'User not authenticated'}, status=401)
-
-    if not is_valid_isbn(isbn):
-        return JsonResponse({'error': 'Invalid ISBN format'}, status=400)
-
-    try:
-        book = Book.objects.get(isbn=isbn)
-    except Book.DoesNotExist:
-        return JsonResponse({'error': 'Book does not exist'}, status=404)
-
-    _, created = FavoriteBook.objects.get_or_create(user=request.user, book=book)
-
-    if created:
-        return JsonResponse({'success': 'Book added to favorites'})
-    else:
-        return JsonResponse({'info': 'Book already in favorites'})
 
 
 @login_required
@@ -292,6 +233,48 @@ def remove_prompt(request, prompt_id):
 
     return redirect('home')
 
+
+def random_quote(request):
+    if request.method == "GET":
+        quotes = list(Quote.objects.all())
+        if not quotes:
+            return JsonResponse({"error": "No quotes found"}, status=404)
+        quote = random.choice(quotes)
+        return JsonResponse({"text": quote.text, "author": quote.author})
+    else:
+        return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+def goal_list(request):
+    goals = ReadingGoal.objects.filter(user=request.user)
+    return render(request, 'index.html', {'goals': goals})
+
+
+@login_required
+def update_goal(request, id):
+    if request.method == "POST":
+        try:
+            goal = get_object_or_404(ReadingGoal, id=id, user=request.user)
+            new_amount = int(request.POST.get('current_amount', 0))
+
+
+            ReadingProgress.objects.create(
+                goal=goal,
+                date=date.today(),
+                amount=new_amount
+            )
+
+            total_progress = ReadingProgress.objects.filter(goal=goal).aggregate(Sum('amount'))['amount__sum'] or 0
+
+            return JsonResponse({
+                'success': True,
+                'new_amount': total_progress,
+                'percentage': goal.progress_percentage()
+            })
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    return JsonResponse({'success': False}, status=400)
 
 
 @login_required
@@ -338,7 +321,8 @@ def home_view(request):
     favorites = FavoriteBook.objects.filter(user=request.user)
     context['favorites'] = favorites
 
-    # Filtering user prompts
+    goals = ReadingGoal.objects.filter(user=request.user)
+    context['goals'] = goals
     user_prompts = MyPrompt.objects.filter(user=request.user)
     if filter_prompt_type:
         user_prompts = user_prompts.filter(prompt_type_id=filter_prompt_type)
