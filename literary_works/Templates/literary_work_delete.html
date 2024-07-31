@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="delete-confirmation">
+    <h2>Are you sure you want to delete "{{ literary_work.title }}"?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label for="password">Enter your password to confirm:</label>
+        <input type="password" name="password" id="password" required>
+        <button type="submit">Delete</button>
+        <a href="{% url 'literary_work_detail' literary_work.pk %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

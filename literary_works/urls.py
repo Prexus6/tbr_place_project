@@ -11,4 +11,7 @@ urlpatterns = [
     path('categories/', views.category_list, name='category_list'),
     path('literary_works/', views.literary_work_list, name='literary_work_list'),
     path('profile/', views.user_profile, name='user_profile'),
+    path('literary_work/<int:pk>/delete/', views.literary_work_delete, name='literary_work_delete'),
+    path('literary_work/<int:pk>/rate/', views.add_or_update_rating, name='add_or_update_rating'),
+    path('literary_work/<int:pk>/delete_rating/', views.delete_rating, name='delete_rating'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

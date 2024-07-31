@@ -20,7 +20,7 @@
 
   </head>
   <body>
-    <!----- TODO - PRIHLASOVACIU ČASŤ Z BAKCENDU IMPLEMENTOVAŤ    ----->
+   <!----- TODO - PRIHLASOVACIU ČASŤ Z BAKCENDU IMPLEMENTOVAŤ    ----->
     <div class="div01-nav">
         <nav>
             <div>
@@ -37,6 +37,11 @@
                 <a href="{% url 'login' %}">Sign In</a>
                 <a href="{% url 'signup' %}">Sign Up</a>
                 {% endif %}
+                <ul>
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'user_profile' %}">Profile</a></li>
+                    <li><a href="{% url 'literary_work_create' %}">Add New Work</a></li>
+                </ul>
             </div>
         </nav>
      <!----- TODO - PRIHLASOVACIU ČASŤ Z BAKCENDU IMPLEMENTOVAŤ    ----->

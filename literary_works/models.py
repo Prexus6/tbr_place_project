@@ -32,3 +32,11 @@ class LiteraryWork(models.Model):
 
     def __str__(self):
         return self.title
+
+class Rating(models.Model):
+    work = models.ForeignKey(LiteraryWork, related_name='ratings', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = ('work', 'user')
