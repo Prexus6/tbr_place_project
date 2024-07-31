@@ -35,6 +35,11 @@
                 <a href="{% url 'login' %}">Sign In</a>
                 <a href="{% url 'signup' %}">Sign Up</a>
                 {% endif %}
+                <ul>
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'user_profile' %}">Profile</a></li>
+                    <li><a href="{% url 'literary_work_create' %}">Add New Work</a></li>
+                </ul>
             </div>
         </nav>
      <!----- TODO - PRIHLASOVACIU ČASŤ Z BAKCENDU IMPLEMENTOVAŤ    ----->
@@ -778,7 +783,10 @@ function getCookie(name) {
 
     <!------ literárne diela, myšlienky, úvahy autorov ------->
     <div id="user-works" class="literary-works-section">
-        <h2>Featured Literary Works</h2>
+        <div class="header-container">
+            <h2>Featured Literary Works</h2>
+            <a href="{% url 'literary_work_create' %}" class="btn btn-primary">Add New Work</a>
+        </div>
         <div class="filter-container">
             <label for="category-filter">Vyberte kategóriu:</label>
             <select id="category-filter">
@@ -810,6 +818,24 @@ function getCookie(name) {
 
 
 <style>
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    color: #fff;
+    background-color: #007bff;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
 .literary-works-section {
     margin-top: 30px;
 }

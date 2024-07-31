@@ -8,12 +8,15 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def literary_work_create(request):
     if request.method == 'POST':
-        form = LiteraryWorkForm(request.POST)
+        form = LiteraryWorkForm(request.POST, request.FILES)
         if form.is_valid():
             literary_work = form.save(commit=False)
             literary_work.user = request.user
             literary_work.save()
+            print("Literary work created successfully!")
             return redirect('home')
+        else:
+            print(form.errors)
     else:
         form = LiteraryWorkForm()
     return render(request, 'literary_work_form.html', {'form': form})
@@ -22,7 +25,7 @@ def literary_work_create(request):
 def literary_work_edit(request, pk):
     literary_work = get_object_or_404(LiteraryWork, pk=pk, user=request.user)
     if request.method == 'POST':
-        form = LiteraryWorkForm(request.POST, instance=literary_work)
+        form = LiteraryWorkForm(request.POST, request.FILES, instance=literary_work)
         if form.is_valid():
             form.save()
             return redirect('home')
@@ -57,3 +60,8 @@ def category_list(request):
     categories = Category.objects.all()
     data = list(categories.values('id', 'name'))
     return JsonResponse(data, safe=False)
+
+@login_required
+def user_profile(request):
+    works = LiteraryWork.objects.filter(user=request.user)
+    return render(request, 'user_profile.html', {'user': request.user, 'works': works})

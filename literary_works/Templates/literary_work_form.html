@@ -9,12 +9,25 @@
     <button type="submit">Save</button>
   </form>
 
-  <!-- Markdown editor (SimpleMDE) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simplemde@latest/dist/simplemde.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/simplemde@latest/dist/simplemde.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      var simplemde = new SimpleMDE({ element: document.getElementById("id_content") });
-    });
-  </script>
+
+  {% if form.instance.pk %}
+    <!-- Markdown editor (SimpleMDE) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simplemde@latest/dist/simplemde.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/simplemde@latest/dist/simplemde.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        var simplemde = new SimpleMDE({
+          element: document.getElementById("id_content"),
+          spellChecker: false,
+          status: false,
+          {#toolbar: false#}
+        });
+
+        // Ensure content is updated before form submission
+        document.querySelector("form").addEventListener("submit", function() {
+          document.getElementById("id_content").value = simplemde.value();
+        });
+      });
+    </script>
+  {% endif %}
 {% endblock %}
