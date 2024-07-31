@@ -14,10 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     option.textContent = category.name;
                     categoryFilter.appendChild(option);
                 });
-            });
+            })
+            .catch(error => console.error('Error loading categories:', error));
     }
 
-     function loadArtworks(categoryId = 'all') {
+    // Načítanie diel
+    function loadArtworks(categoryId = 'all') {
         const url = categoryId === 'all' ? '/api/literary_works/' : `/api/literary_works/?category=${categoryId}`;
         fetch(url)
             .then(response => response.json())
@@ -34,17 +36,18 @@ document.addEventListener('DOMContentLoaded', () => {
                             <p><strong>Author:</strong> ${work['user__username']}</p>
                             <p><strong>Category:</strong> ${work['category__name']}</p>
                             <p>${work.description.slice(0, 150)}${work.description.length > 150 ? '...' : ''}</p>
-                            <a href="/literary_works/${work.id}/">Read More</a>
+                            <a href="/api/literary_work/${work.id}/">Read More</a> 
                         `;
                         resultsContainer.appendChild(div);
                     });
                 }
-            });
+            })
+            .catch(error => console.error('Error loading artworks:', error));
     }
 
     loadCategories();
 
-      filterButton.addEventListener('click', () => {
+    filterButton.addEventListener('click', () => {
         const selectedCategory = categoryFilter.value;
         loadArtworks(selectedCategory);
     });

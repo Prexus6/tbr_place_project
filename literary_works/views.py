@@ -1,5 +1,5 @@
 import markdown2
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import LiteraryWork, Category
 from .forms import LiteraryWorkForm
@@ -32,9 +32,14 @@ def literary_work_edit(request, pk):
 
 @login_required
 def literary_work_detail(request, pk):
-    literary_work = get_object_or_404(LiteraryWork, pk=pk)
-    literary_work.content_html = markdown2.markdown(literary_work.content)
-    return render(request, 'literary_work_detail.html', {'literary_work': literary_work})
+    try:
+        literary_work = get_object_or_404(LiteraryWork, pk=pk)
+        literary_work.content_html = markdown2.markdown(literary_work.content)
+        return render(request, 'literary_work_detail.html', {'literary_work': literary_work})
+    except Exception as e:
+        print(f"Error: {e}")
+        return HttpResponse("Something went wrong.")
+
 
 def literary_work_list(request):
     category_id = request.GET.get('category')

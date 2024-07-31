@@ -10,4 +10,4 @@ urlpatterns = [
     path('literary_work/<int:pk>/', views.literary_work_detail, name='literary_work_detail'),
     path('categories/', views.category_list, name='category_list'),
     path('literary_works/', views.literary_work_list, name='literary_work_list'),
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
