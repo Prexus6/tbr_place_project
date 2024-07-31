@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const categoryFilter = document.getElementById('category-filter');
+    const sortByFilter = document.getElementById('sort-by-filter');
     const filterButton = document.getElementById('filter-button');
     const resultsContainer = document.getElementById('user-results');
 
@@ -19,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Načítanie diel
-    function loadArtworks(categoryId = 'all') {
-        const url = categoryId === 'all' ? '/api/literary_works/' : `/api/literary_works/?category=${categoryId}`;
+    function loadArtworks(categoryId = 'all', sortBy = 'date_published') {
+        const url = `/api/literary_works/?category=${categoryId}&sort_by=${sortBy}`;
         fetch(url)
             .then(response => response.json())
             .then(data => {
@@ -31,12 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     data.forEach(work => {
                         const div = document.createElement('div');
                         div.innerHTML = `
-                            ${work.image ? `<img src="/media/${work.image}" alt="${work.title}">` : ''}
+                            ${work.image ? `<img src="${work.image}" alt="${work.title}">` : ''}
                             <h3>${work.title}</h3>
                             <p><strong>Author:</strong> ${work['user__username']}</p>
                             <p><strong>Category:</strong> ${work['category__name']}</p>
                             <p>${work.description.slice(0, 150)}${work.description.length > 150 ? '...' : ''}</p>
-                            <a href="/api/literary_work/${work.id}/">Read More</a> 
+                            <p><strong>Average Rating:</strong> ${work.average_rating ? work.average_rating.toFixed(1) : 'No Ratings'}</p>
+                            <p><strong>Number of Ratings:</strong> ${work.num_ratings}</p>
+                            <a href="/api/literary_work/${work.id}/">Read More</a>
                         `;
                         resultsContainer.appendChild(div);
                     });
@@ -49,7 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     filterButton.addEventListener('click', () => {
         const selectedCategory = categoryFilter.value;
-        loadArtworks(selectedCategory);
+        const selectedSortBy = sortByFilter.value; // Získanie vybraného kritéria pre zoradenie
+        loadArtworks(selectedCategory, selectedSortBy);
     });
 
     loadArtworks();

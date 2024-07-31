@@ -29,6 +29,29 @@
                 </form>
             {% endif %}
         {% endif %}
+
+        <div class="comments">
+            <h3>Comments</h3>
+            <ul>
+                {% for comment in literary_work.comments.all %}
+                    <li>
+                        <p><strong>{{ comment.user.username }}:</strong> {{ comment.content }}</p>
+                        <p><small>Posted on {{ comment.created_at }}</small></p>
+                    </li>
+                {% empty %}
+                    <li>No comments yet.</li>
+                {% endfor %}
+            </ul>
+
+            {% if user.is_authenticated %}
+                <form action="{% url 'literary_work_detail' literary_work.pk %}" method="post">
+                    {% csrf_token %}
+                    <textarea name="comment_content" rows="3" placeholder="Add a comment..."></textarea>
+                    <button type="submit" name="submit_comment">Submit Comment</button>
+                </form>
+            {% endif %}
+        </div>
+
     </div>
 </div>
 {% endblock %}

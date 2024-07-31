@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum
+from django.db.models import Sum, Avg
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -12,9 +12,7 @@ from .models import Prompt, MyPrompt, FavoriteBook, Book, MyPromptType, Reader, 
     ReadingProgress
 import random
 from django.contrib import messages
-from .utils import  is_valid_isbn
-# save_book_from_open_library
-import  requests
+from literary_works.models import LiteraryWork
 import json
 from datetime import date
 
@@ -312,7 +310,11 @@ def home_view(request):
             # result = search_books_and_handle_favorites(request)
             # if isinstance(result, dict):
             #     context.update(result)
+
     works = LiteraryWork.objects.all()
+    for work in works:
+        work.average_rating = work.ratings.aggregate(average=Avg('rating')).get('average')
+
     context['works'] = works
     favorites = FavoriteBook.objects.filter(user=request.user)
     context['favorites'] = favorites

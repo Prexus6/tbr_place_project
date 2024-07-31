@@ -2,7 +2,7 @@ import markdown2
 from django.db.models import Avg
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import LiteraryWork, Category, Rating
+from .models import LiteraryWork, Category, Rating, Comment
 from .forms import LiteraryWorkForm, RatingForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -59,6 +59,17 @@ def literary_work_detail(request, pk):
         elif 'remove_rating' in request.POST:
             Rating.objects.filter(work=literary_work, user=request.user).delete()
             return redirect('literary_work_detail', pk=pk)
+        elif 'submit_comment' in request.POST:
+            comment_content = request.POST.get('comment_content')
+            if comment_content:
+                Comment.objects.create(
+                    work=literary_work,
+                    user=request.user,
+                    content=comment_content
+                )
+                return redirect('literary_work_detail', pk=pk)
+        else:
+            form = RatingForm()
     else:
         form = RatingForm()
 
@@ -74,14 +85,39 @@ def literary_work_detail(request, pk):
 
 def literary_work_list(request):
     category_id = request.GET.get('category')
+    sort_by = request.GET.get('sort_by', 'date_published')  # Predvolené zoradenie podľa dátumu publikovania
+
+    # Filtrácia podľa kategórie
     if category_id and category_id != 'all':
         works = LiteraryWork.objects.filter(category_id=category_id)
     else:
         works = LiteraryWork.objects.all()
 
-    data = list(works.values('id', 'title', 'description', 'user__username', 'category__name', 'image'))
-    for work in data:
-        work['image'] = work['image'] if work['image'] else ''
+    # Zoradenie podľa vybraného parametra
+    if sort_by == 'highest_rating':
+        works = works.annotate(avg_rating=Avg('ratings__rating')).order_by('-avg_rating')
+    elif sort_by == 'most_ratings':
+        works = works.annotate(num_ratings=Count('ratings')).order_by('-num_ratings')
+    elif sort_by == 'date_published':
+        works = works.order_by('-created_at')  # Predvolené zoradenie podľa dátumu publikovania
+    else:
+        works = works.all()
+
+    # Vytvorenie dát pre odpoveď
+    data = []
+    for work in works:
+        average_rating = work.ratings.aggregate(average=Avg('rating')).get('average', 0)
+        data.append({
+            'id': work.id,
+            'title': work.title,
+            'description': work.description,
+            'user__username': work.user.username,
+            'category__name': work.category.name if work.category else 'No Category',
+            'image': work.image.url if work.image else '',
+            'average_rating': average_rating,
+            'num_ratings': work.ratings.count()
+        })
+
     return JsonResponse(data, safe=False)
 
 def category_list(request):

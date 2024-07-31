@@ -792,6 +792,12 @@ function getCookie(name) {
             <select id="category-filter">
                 <option value="all">Všetky kategórie</option>
             </select>
+            <label for="sort-by-filter">Zoradiť podľa:</label>
+            <select id="sort-by-filter">
+                <option value="date_published">Dátum publikovania</option>
+                <option value="highest_rating">Najlepšie hodnotenie</option>
+                <option value="most_ratings">Najviac hodnotení</option>
+            </select>
             <button id="filter-button">Filtrovať</button>
         </div>
 
@@ -805,6 +811,8 @@ function getCookie(name) {
                     <p><strong>Author:</strong> {{ work.user.username }}</p>
                     <p><strong>Category:</strong> {{ work.category.name }}</p>
                     <p>{{ work.description|slice:":150" }}{% if work.description|length > 150 %}...{% endif %}</p>
+                    <p><strong>Average Rating:</strong> {% if work.average_rating %}{{ work.average_rating|floatformat:1 }}{% else %}No Ratings{% endif %}</p>
+                    <p><strong>Number of Ratings:</strong> {{ work.num_ratings }}</p>
                     <a href="{% url 'literary_work_detail' work.pk %}">Read More</a>
                 </div>
             {% empty %}
@@ -813,7 +821,7 @@ function getCookie(name) {
         </div>
     </div>
 
-  <script src="{% static 'js/library_work.js' %}"></script>
+    <script src="{% static 'js/library_work.js' %}"></script>
 
 
 
