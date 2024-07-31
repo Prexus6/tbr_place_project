@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load static  %}
+load static
+{% block content %}
+<div class="div03-prompts" id="prompts-section">
+      <div class="div0301-predefprompts">
+    <h2>{{ literary_work.title }}</h2>
+  <p>{{ literary_work.description }}</p>
+  <div class="markdown-content">{{ literary_work.content_html|safe }}</div>
+  {% if literary_work.user == user %}
+    <a href="{% url 'literary_work_edit' literary_work.pk %}">Edit</a>
+  {% endif %}
+    </div>
+</div>
+{% endblock %}
+

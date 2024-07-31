@@ -169,7 +169,8 @@ class ReadingGoal(models.Model):
 class ReadingProgress(models.Model):
     goal = models.ForeignKey(ReadingGoal, on_delete=models.CASCADE)
     date = models.DateField()
-    amount = models.PositiveIntegerField()  # Napr. počet strán, hodín
+    amount = models.PositiveIntegerField()
 
     def __str__(self):
         return f"{self.goal.goal_name} - {self.date}: {self.amount}"
+

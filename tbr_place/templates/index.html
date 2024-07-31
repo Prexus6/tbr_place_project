@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TBR Place</title>
     <link rel="stylesheet" href="styles.css" />
+      <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -204,7 +205,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         </style>
 
-  moj komentar
 
       <!--------------------------------- MY PROPMPTS SECTION ----------------------------->
 
@@ -375,29 +375,55 @@ $(document).ready(function() {
 
 
   <style>
-        .goal-container {
-            margin: 20px;
-        }
-        .goal {
-            margin-bottom: 20px;
-        }
-        .progress-bar {
-            width: 100%;
-            background-color: #f3f3f3;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        .progress-bar-fill {
-            height: 20px;
-            background-color: #4caf50;
-            text-align: center;
-            color: white;
-            line-height: 20px;
-        }
-    </style>
+    .goal-container {
+        margin: 20px;
+        font-family: Arial, sans-serif;
+    }
+    .goal {
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .goal h3 {
+        margin-top: 0;
+    }
+    .progress-bar {
+        width: 100%;
+        background-color: #f3f3f3;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    .progress-bar-fill {
+        height: 20px;
+        background-color: #4caf50;
+        text-align: center;
+        color: white;
+        line-height: 20px;
+    }
+    .goal-form {
+        margin-top: 15px;
+    }
+    .goal-form input {
+        padding: 5px;
+        margin-right: 5px;
+    }
+    .goal-form button {
+        padding: 5px 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .goal-form button:hover {
+        background-color: #0056b3;
+    }
+</style>
 
-
-  <div class="goal-container">
+<div class="goal-container">
     <h2>My Reading Goals</h2>
     {% for goal in goals %}
         <div class="goal">
@@ -405,12 +431,14 @@ $(document).ready(function() {
             <p>Target: {{ goal.target_amount }} units</p>
             <p>Current: <span id="current-amount-{{ goal.id }}">{{ goal.current_amount }}</span></p>
             <div class="progress-bar">
-                <div class="progress-bar-fill" id="progress-bar-fill-{{ goal.id }}" style="width: {{ goal.progress_percentage }}%">
+                <div class="progress-bar-fill" id="progress-bar-fill-{{ goal.id }}" style="width: {{ goal.progress_percentage }}%;">
                     {{ goal.progress_percentage }}%
                 </div>
             </div>
-            <input type="number" id="new-amount-{{ goal.id }}" placeholder="Update amount" min="0">
-            <button onclick="updateGoal({{ goal.id }})">Update</button>
+            <div class="goal-form">
+                <input type="number" id="new-amount-{{ goal.id }}" placeholder="Update amount" min="0">
+                <button onclick="updateGoal({{ goal.id }})">Update</button>
+            </div>
         </div>
     {% endfor %}
 </div>
@@ -444,6 +472,7 @@ $(document).ready(function() {
         });
     }
 </script>
+
 
 
 
@@ -745,10 +774,166 @@ function getCookie(name) {
     }
 }
 
-
 </style>
 
+    <!------ literárne diela, myšlienky, úvahy autorov ------->
+    <div id="user-works" class="literary-works-section">
+        <h2>Featured Literary Works</h2>
+        <div class="filter-container">
+            <label for="category-filter">Vyberte kategóriu:</label>
+            <select id="category-filter">
+                <option value="all">Všetky kategórie</option>
+            </select>
+            <button id="filter-button">Filtrovať</button>
+        </div>
 
+        <div id="user-results">
+            {% for work in works %}
+                <div>
+                    {% if work.image %}
+                        <img src="{{ work.image.url }}" alt="{{ work.title }}">
+                    {% endif %}
+                    <h3>{{ work.title }}</h3>
+                    <p><strong>Author:</strong> {{ work.user.username }}</p>
+                    <p><strong>Category:</strong> {{ work.category.name }}</p>
+                    <p>{{ work.description|slice:":150" }}{% if work.description|length > 150 %}...{% endif %}</p>
+                    <a href="{% url 'literary_work_detail' work.pk %}">Read More</a>
+                </div>
+            {% empty %}
+                <div>No literary works found.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+  <script src="{% static 'js/library_work.js' %}"></script>
+
+
+
+<style>
+.literary-works-section {
+    margin-top: 30px;
+}
+
+.literary-works-section ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.literary-works-section li {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.literary-works-section h3 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.literary-works-section p {
+    margin: 5px 0;
+}
+
+#user-results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+#user-results div {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    width: calc(50% - 20px); /* Dva stĺpce */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+#user-results img {
+    max-width: 100px;
+    max-height: 150px;
+    object-fit: cover;
+    border-radius: 4px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+#user-results strong {
+    display: block;
+    font-size: 1.2em;
+    margin-bottom: 5px;
+}
+
+#user-results p {
+    margin: 5px 0;
+}
+
+#pagination {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#pagination a {
+    text-decoration: none;
+    color: #007bff;
+    padding: 10px 20px;
+    margin: 0 5px;
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 1em;
+}
+
+#pagination a:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+@media (max-width: 1200px) {
+    #user-results div {
+        width: calc(33.33% - 20px);
+    }
+}
+
+@media (max-width: 992px) {
+    #user-results div {
+        width: calc(50% - 20px);
+    }
+}
+
+@media (max-width: 768px) {
+    #user-results {
+        flex-direction: column;
+    }
+
+    #user-results div {
+        width: 100%;
+    }
+
+    #user-results img {
+        max-width: 80px;
+        max-height: 120px;
+    }
+}
+
+@media (max-width: 576px) {
+    #user-results img {
+        max-width: 60px;
+        max-height: 90px;
+    }
+
+    #user-results strong {
+        font-size: 1em;
+    }
+
+    #user-results p {
+        font-size: 0.9em;
+    }
+
+    #pagination a {
+        font-size: 0.9em;
+    }
+}
+</style>
 <!------------------------ pätička---------------------------->
 
     <div class="div05-footer"></div>
@@ -1527,6 +1712,7 @@ body {
 }
 
 </style>
+
 
   </body>
 </html>

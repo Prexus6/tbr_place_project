@@ -5,6 +5,8 @@ from django.db.models import Sum
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
+
+from literary_works.models import LiteraryWork
 from .forms import MyPromptForm, MyPromptTypeForm
 from .models import Prompt, MyPrompt, FavoriteBook, Book, MyPromptType, Reader, PromptType, Quote, ReadingGoal, \
     ReadingProgress
@@ -257,13 +259,14 @@ def update_goal(request, id):
             goal = get_object_or_404(ReadingGoal, id=id, user=request.user)
             new_amount = int(request.POST.get('current_amount', 0))
 
-
+            # Pridaj nový záznam do ReadingProgress
             ReadingProgress.objects.create(
                 goal=goal,
                 date=date.today(),
                 amount=new_amount
             )
 
+            # Spočítaj celkový pokrok
             total_progress = ReadingProgress.objects.filter(goal=goal).aggregate(Sum('amount'))['amount__sum'] or 0
 
             return JsonResponse({
@@ -272,7 +275,7 @@ def update_goal(request, id):
                 'percentage': goal.progress_percentage()
             })
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error: {e}")  # Log error to console
             return JsonResponse({'success': False, 'error': str(e)}, status=400)
     return JsonResponse({'success': False}, status=400)
 
@@ -309,13 +312,13 @@ def home_view(request):
             # result = search_books_and_handle_favorites(request)
             # if isinstance(result, dict):
             #     context.update(result)
-
+    works = LiteraryWork.objects.all()
+    context['works'] = works
     favorites = FavoriteBook.objects.filter(user=request.user)
     context['favorites'] = favorites
     context['all_prompt_types'] = PromptType.objects.all()
     context['prompt_form'] = MyPromptForm(user=request.user)
 
-    # Získajte prompt typy iba pre aktuálneho používateľa
     context['prompt_types'] = MyPromptType.objects.filter(user=request.user)
     context['prompt_type_form'] = MyPromptTypeForm()
     favorites = FavoriteBook.objects.filter(user=request.user)

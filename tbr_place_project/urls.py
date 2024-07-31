@@ -27,7 +27,8 @@ urlpatterns = [
                   path("admin/", admin.site.urls),
                   path('accounts/', include('accounts.urls')),
                   path('', include('tbr_place.urls')),
-                  # path('search-books-bytitle/<title>/', utils.search_books_by_title),
+                  path('literary-works/', include('literary_works.urls')),
+                  path('api/', include('literary_works.urls')),
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
