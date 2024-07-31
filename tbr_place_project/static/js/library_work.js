@@ -3,6 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const sortByFilter = document.getElementById('sort-by-filter');
     const filterButton = document.getElementById('filter-button');
     const resultsContainer = document.getElementById('user-results');
+    const paginationContainer = document.getElementById('pagination');
+
+    let currentPage = 1;
+    let totalPages = 1;
 
     // Načítanie kategórií
     function loadCategories() {
@@ -20,16 +24,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Načítanie diel
-    function loadArtworks(categoryId = 'all', sortBy = 'date_published') {
-        const url = `/api/literary_works/?category=${categoryId}&sort_by=${sortBy}`;
+    function loadArtworks(categoryId = 'all', sortBy = 'date_published', page = 1) {
+        const url = `/api/literary_works/?category=${categoryId}&sort_by=${sortBy}&page=${page}`;
         fetch(url)
             .then(response => response.json())
             .then(data => {
                 resultsContainer.innerHTML = '';
-                if (data.length === 0) {
+                paginationContainer.innerHTML = '';
+
+                if (data.results.length === 0) {
                     resultsContainer.innerHTML = '<div>No literary works found.</div>';
                 } else {
-                    data.forEach(work => {
+                    data.results.forEach(work => {
                         const div = document.createElement('div');
                         div.innerHTML = `
                             ${work.image ? `<img src="${work.image}" alt="${work.title}">` : ''}
@@ -39,10 +45,23 @@ document.addEventListener('DOMContentLoaded', () => {
                             <p>${work.description.slice(0, 150)}${work.description.length > 150 ? '...' : ''}</p>
                             <p><strong>Average Rating:</strong> ${work.average_rating ? work.average_rating.toFixed(1) : 'No Ratings'}</p>
                             <p><strong>Number of Ratings:</strong> ${work.num_ratings}</p>
+                            <p><strong>Number of Comments:</strong> ${work.num_comments}</p>
                             <a href="/api/literary_work/${work.id}/">Read More</a>
                         `;
                         resultsContainer.appendChild(div);
                     });
+
+                    // Paginácia
+                    totalPages = data.num_pages;
+                    for (let i = 1; i <= totalPages; i++) {
+                        const pageButton = document.createElement('button');
+                        pageButton.textContent = i;
+                        pageButton.disabled = (i === parseInt(data.page));
+                        pageButton.addEventListener('click', () => {
+                            loadArtworks(categoryId, sortBy, i);
+                        });
+                        paginationContainer.appendChild(pageButton);
+                    }
                 }
             })
             .catch(error => console.error('Error loading artworks:', error));
@@ -52,8 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     filterButton.addEventListener('click', () => {
         const selectedCategory = categoryFilter.value;
-        const selectedSortBy = sortByFilter.value; // Získanie vybraného kritéria pre zoradenie
-        loadArtworks(selectedCategory, selectedSortBy);
+        const selectedSortBy = sortByFilter.value;
+        loadArtworks(selectedCategory, selectedSortBy, 1);
     });
 
     loadArtworks();

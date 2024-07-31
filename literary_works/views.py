@@ -1,5 +1,6 @@
 import markdown2
-from django.db.models import Avg
+from django.core.paginator import PageNotAnInteger, EmptyPage, Paginator
+from django.db.models import Avg, Count
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import LiteraryWork, Category, Rating, Comment
@@ -68,6 +69,16 @@ def literary_work_detail(request, pk):
                     content=comment_content
                 )
                 return redirect('literary_work_detail', pk=pk)
+        elif 'edit_comment' in request.POST:
+            comment_id = request.POST.get('comment_id')
+            new_content = request.POST.get('edit_comment_content')
+            if new_content:
+                Comment.objects.filter(id=comment_id, user=request.user).update(content=new_content)
+            return redirect('literary_work_detail', pk=pk)
+        elif 'delete_comment' in request.POST:
+            comment_id = request.POST.get('comment_id')
+            Comment.objects.filter(id=comment_id, user=request.user).delete()
+            return redirect('literary_work_detail', pk=pk)
         else:
             form = RatingForm()
     else:
@@ -85,28 +96,36 @@ def literary_work_detail(request, pk):
 
 def literary_work_list(request):
     category_id = request.GET.get('category')
-    sort_by = request.GET.get('sort_by', 'date_published')  # Predvolené zoradenie podľa dátumu publikovania
+    sort_by = request.GET.get('sort_by', 'date_published')
+    page = request.GET.get('page', 1)
+    per_page = 6
 
-    # Filtrácia podľa kategórie
     if category_id and category_id != 'all':
         works = LiteraryWork.objects.filter(category_id=category_id)
     else:
         works = LiteraryWork.objects.all()
 
-    # Zoradenie podľa vybraného parametra
     if sort_by == 'highest_rating':
         works = works.annotate(avg_rating=Avg('ratings__rating')).order_by('-avg_rating')
     elif sort_by == 'most_ratings':
         works = works.annotate(num_ratings=Count('ratings')).order_by('-num_ratings')
     elif sort_by == 'date_published':
-        works = works.order_by('-created_at')  # Predvolené zoradenie podľa dátumu publikovania
+        works = works.order_by('-created_at')
     else:
         works = works.all()
 
-    # Vytvorenie dát pre odpoveď
+    paginator = Paginator(works, per_page)
+    try:
+        paginated_works = paginator.page(page)
+    except PageNotAnInteger:
+        paginated_works = paginator.page(1)
+    except EmptyPage:
+        paginated_works = paginator.page(paginator.num_pages)
+
     data = []
-    for work in works:
+    for work in paginated_works:
         average_rating = work.ratings.aggregate(average=Avg('rating')).get('average', 0)
+        num_comments = work.comments.count()
         data.append({
             'id': work.id,
             'title': work.title,
@@ -115,10 +134,17 @@ def literary_work_list(request):
             'category__name': work.category.name if work.category else 'No Category',
             'image': work.image.url if work.image else '',
             'average_rating': average_rating,
-            'num_ratings': work.ratings.count()
+            'num_ratings': work.ratings.count(),
+            'num_comments': num_comments
         })
 
-    return JsonResponse(data, safe=False)
+    response = {
+        'results': data,
+        'page': page,
+        'num_pages': paginator.num_pages
+    }
+
+    return JsonResponse(response, safe=False)
 
 def category_list(request):
     categories = Category.objects.all()

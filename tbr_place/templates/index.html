@@ -813,12 +813,18 @@ function getCookie(name) {
                     <p>{{ work.description|slice:":150" }}{% if work.description|length > 150 %}...{% endif %}</p>
                     <p><strong>Average Rating:</strong> {% if work.average_rating %}{{ work.average_rating|floatformat:1 }}{% else %}No Ratings{% endif %}</p>
                     <p><strong>Number of Ratings:</strong> {{ work.num_ratings }}</p>
+                    <p><strong>Number of Comments:</strong> {{ work.num_comments }}</p>
                     <a href="{% url 'literary_work_detail' work.pk %}">Read More</a>
                 </div>
             {% empty %}
                 <div>No literary works found.</div>
             {% endfor %}
         </div>
+
+        <div id="pagination" class="pagination-container">
+        {#      paginácia      #}
+        </div>
+
     </div>
 
     <script src="{% static 'js/library_work.js' %}"></script>
@@ -901,26 +907,7 @@ function getCookie(name) {
     margin: 5px 0;
 }
 
-#pagination {
-    text-align: center;
-    margin-top: 20px;
-}
 
-#pagination a {
-    text-decoration: none;
-    color: #007bff;
-    padding: 10px 20px;
-    margin: 0 5px;
-    border: 1px solid #007bff;
-    border-radius: 4px;
-    background-color: #fff;
-    font-size: 1em;
-}
-
-#pagination a:hover {
-    background-color: #007bff;
-    color: #fff;
-}
 
 @media (max-width: 1200px) {
     #user-results div {
@@ -967,6 +954,29 @@ function getCookie(name) {
         font-size: 0.9em;
     }
 }
+
+.pagination-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination-container button {
+    margin: 0 5px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    background-color: #f8f8f8;
+    cursor: pointer;
+}
+
+.pagination-container button:disabled {
+    background-color: #e0e0e0;
+    cursor: not-allowed;
+}
+
+.pagination-container button:hover:not(:disabled) {
+    background-color: #ddd;
+}
+
 </style>
 <!------------------------ pätička---------------------------->
 
