@@ -40,8 +40,7 @@ function fetchBooks(title, author, genre, filterByAuthor, filterByGenre, page) {
                         <h3>${book.title}</h3>
                         <p>by <strong>${book.author_name}</strong></p>
                         <p>Genres: ${book.genres.join(', ')}</p>
-                        <button onclick="fetchBookDetails('${book.key}')">View Details</button>
-                        <button onclick="addToMyBooks('${book.key}')">Add to My Books</button>
+                        
                     </div>
                 `;
             });
