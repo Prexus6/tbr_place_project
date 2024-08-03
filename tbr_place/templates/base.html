@@ -20,199 +20,49 @@
 
   </head>
   <body>
-   <!----- TODO - PRIHLASOVACIU ČASŤ Z BAKCENDU IMPLEMENTOVAŤ    ----->
     <div class="div01-nav">
-        <nav>
-            <div>
-                <h1>TBR Place</h1>
-            </div>
-            <div class="auth-buttons">
-                {% if user.is_authenticated %}
-                <p>Welcome, {{ user.username }}!</p>
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit">Logout</button>
-                </form>
-                {% else %}
-                <a href="{% url 'login' %}">Sign In</a>
-                <a href="{% url 'signup' %}">Sign Up</a>
-                {% endif %}
-                <ul>
-                    <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'user_profile' %}">Profile</a></li>
-                    <li><a href="{% url 'literary_work_create' %}">Add New Work</a></li>
-                </ul>
-            </div>
-        </nav>
-     <!----- TODO - PRIHLASOVACIU ČASŤ Z BAKCENDU IMPLEMENTOVAŤ    ----->
 
       <div class="div0101-logo">
         <div class="logo-image">
-          <img src="Logo_charcoal.png" alt="Logo" class="Logo_charcoal" />
+          <img src="{% static 'images/TBR place logo.png' %}" alt="Logo" class="Logo_charcoal">
         </div>
         <p>TBR Place</p>
       </div>
       <div class="nav-button">
-        <button class="SignBtn" id="loginBtn" class="white-btn" onclick="login()">Log In</button>
-        <button class="SignBtn" id="registerBtn" onclick="register()">Sign Up</button>
+                {% if user.is_authenticated %}
+                    <p class="welcome-message"> Welcome, {{ user.username }}!</p>
+                    <button class="SignBtn" onclick="location.href='{% url 'home' %}'">Home</button>
+                    <button class="SignBtn" onclick="location.href='{% url 'user_profile' %}'">Profile</button>
+                    <button class="SignBtn" onclick="location.href='{% url 'literary_work_create' %}'">Add New Work</button>
+                    <div class="auth-actions">
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="SignBtn logout-btn">Logout</button>
+                        </form>
+                    </div>
+                {% else %}
+                <a href="{% url 'login' %}">Sign In</a>
+                <a href="{% url 'signup' %}">Sign Up</a>
+                {% endif %}
+
+
       </div>
       <div class="nav-menu-btn">
         <i class="bx bx-menu" onclick="myMenuFunction"></i>
       </div>
     </div>
-    <!----------------- Form Box ------------------->
-    <div class="form-box">
-      <!------------- Login Form --------------->
-      <div class="login-container" id="login">
-        <div class="top">
-          <span>Don't have an account? <a href="#" onclick="register()">Sign up</a></span>
-          <header class="header02">Log in</header>
-        </div>
 
-        <div class="input-box">
-          <input type="text" class="input-field" placeholder="Username" />
-          <i class="bx bx-user"></i>
-        </div>
-        <div class="input-box">
-          <input type="password" class="input-field" placeholder="Password" />
-          <i class="bx bx-lock-alt"></i>
-        </div>
-
-        <div class="input-box">
-          <input type="submit" class="submit" id="loginSubmit" value="Log in" />
-        </div>
-        <div class="two-col">
-          <div class="one">
-            <input type="checkbox" id="login-check" />
-            <label for="login-check"> Remember me </label>
-          </div>
-          <div class="two">
-            <label><a href="#">Forgot password?</a> </label>
-          </div>
-        </div>
-      </div>
-
-      <!------------- Registration Form --------------->
-      <div class="register-container" id="register">
-        <div class="top">
-          <span>Have an account? <a href="#" onclick="login()">Login</a></span>
-          <header class="header01">Sign up</header>
-        </div>
-
-        <div class="input-box">
-          <input type="text" class="input-field" placeholder="Username" />
-          <i class="bx bx-envelope"></i>
-        </div>
-        <div class="input-box">
-          <input type="password" class="input-field" placeholder="Password" />
-          <i class="bx bx-lock-alt"></i>
-        </div>
-        <div class="input-box02">
-          <a href="#" class="dropdown-toggle">Pick your security question ▼</a>
-          <ul class="dropdown-menu">
-            <li><a href="#">Question 1</a></li>
-            <li><a href="#">Question 2</a></li>
-            <li><a href="#">Question 3</a></li>
-          </ul>
-        </div>
-        <div class="input-box">
-          <input type="password" class="input-field" placeholder="SecurityAnswer" />
-          <i class="bx bx-securityanswer"></i>
-        </div>
-        <div class="input-box">
-          <input type="submit" class="submit" id="registerSubmit" value="Register" />
-        </div>
-        <div class="two-col">
-          <div class="one">
-            <input type="checkbox" id="register-check" />
-            <label for="register-check"> Remember me </label>
-          </div>
-        </div>
-      </div>
-    </div>
 
 
 {% block content %}
-<!----------------------- WELCOME SECTION ----------------------------->
-<div class="div02-intro">
-  <div class="div0201-welcome">
-    <h2 class="welcome-reader">Hi, reader!</h2>
-    <p class="find-your-book">Find your next book to read:</p>
-    <div class="div0201-mainbuttons">
-      <a href="#prompts-section" class="main-button-prompts">Generate a prompt</a>
-      <a href="#mybooks-title-id" class="main-button-books">Pick a book from your list</a>
-    </div>
-  </div>
-</div>
+
 {% endblock %}
 
 <!------------------------ pätička---------------------------->
 
     <div class="div05-footer"></div>
     <script src="script.js"></script>
-    <script>
-      var a = document.getElementById("loginBtn");
-      var b = document.getElementById("registerBtn");
-      var x = document.getElementById("login");
-      var y = document.getElementById("register");
 
-      function register() {
-        document.querySelector(".login-container").style.transform = "translateX(-150%)";
-        document.querySelector(".register-container").style.transform = "translateX(0)";
-        a.classList.add("white-btn");
-        b.classList.remove("white-btn");
-      }
-
-      function login() {
-        document.querySelector(".login-container").style.transform = "translateX(0)";
-        document.querySelector(".register-container").style.transform = "translateX(150%)";
-        b.classList.add("white-btn");
-        a.classList.remove("white-btn");
-      }
-    </script>
-    <script>
-      document.getElementById("loginBtn").addEventListener("click", function () {
-        showForm("login");
-      });
-
-      document.getElementById("registerBtn").addEventListener("click", function () {
-        showForm("register");
-      });
-
-      document.getElementById("loginSubmit").addEventListener("click", function (event) {
-        event.preventDefault(); // Prevent default form submission
-        hideFormBox();
-      });
-
-      document.getElementById("registerSubmit").addEventListener("click", function (event) {
-        event.preventDefault(); // Prevent default form submission
-        hideFormBox();
-      });
-
-      function showForm(formType) {
-        var formBox = document.querySelector(".form-box");
-        var loginForm = document.querySelector(".login-container");
-        var registerForm = document.querySelector(".register-container");
-
-        // Show the form box
-        formBox.style.display = "flex"; // Make it visible
-
-        if (formType === "login") {
-          loginForm.style.transform = "translateX(0)";
-          registerForm.style.transform = "translateX(150%)";
-        } else if (formType === "register") {
-          loginForm.style.transform = "translateX(-150%)";
-          registerForm.style.transform = "translateX(0)";
-        }
-      }
-
-      function hideFormBox() {
-        var formBox = document.querySelector(".form-box");
-
-        // Hide the form box
-        formBox.style.display = "none";
-      }
-    </script>
 
 
 
