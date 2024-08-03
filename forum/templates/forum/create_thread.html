@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Thread</title>
+</head>
+<body>
+    <h1>Create Thread</h1>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="Thread title"><br>
+        <select name="subcategory_id">
+            {% for subcategory in subcategories %}
+                <option value="{{ subcategory.id }}">{{ subcategory.name }}</option>
+            {% endfor %}
+        </select><br>
+        <button type="submit">Create Thread</button>
+    </form>
+</body>
+</html>
