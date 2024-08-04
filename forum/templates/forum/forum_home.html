@@ -3,6 +3,8 @@
 {% block content %}
     <h1>Forum Home</h1>
 
+    <a href="{% url 'forum_home' %}">Home</a> <!-- Added Home link -->
+
     <h2>My Threads</h2>
     {% if user_threads %}
         <ul>
