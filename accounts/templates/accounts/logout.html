@@ -1,29 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-    <script src="{% static 'script.js' %}" defer></script>
-    <title>Logout</title>
-</head>
-<body>
-    <header>
-        <img src="{% static 'Logo_charcoal.png' %}" alt="Logo">
-    </header>
-    <main>
-        <h2>Logout</h2>
-        <p>You have been logged out. <a href="{% url 'login' %}">Login again</a></p>
-        {% if messages %}
-            <ul>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    </main>
-    <footer>
-        <p>© 2024 TBR Place</p>
-    </footer>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+<header>
+    <img src="{% static 'Logo_charcoal.png' %}" alt="Logo">
+</header>
+<main>
+    <h2>Logout</h2>
+    <p>You have been logged out. <a href="{% url 'login' %}">Login again</a></p>
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</main>
+{% endblock %}
