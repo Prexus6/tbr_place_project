@@ -1,34 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Logout</title>
 </head>
 <body>
     <header>
         <nav>
             <div class="logo">
-                <img src="/static/logo.png" alt="Logo">
+                <img src="logo.png" alt="Logo" />
             </div>
             <div>
                 <h1>TBR Place</h1>
             </div>
             <div class="auth-buttons">
-                <a href="/accounts/login/">Login</a>
-                <a href="/accounts/signup/">Sign Up</a>
+                <a href="{% url 'login' %}">Sign In</a>
+                <a href="{% url 'signup' %}">Sign Up</a>
             </div>
         </nav>
     </header>
+
     <main>
-        <h2>Logout</h2>
-        <form method="post">
-            {% csrf_token %}
-            <button type="submit">Logout</button>
-        </form>
+        <h1>You have been logged out successfully</h1>
+        <p>Thank you for visiting TBR Place.</p>
     </main>
-    <footer>
-        <p>&copy; 2024 TBR Place</p>
-    </footer>
 </body>
 </html>
+

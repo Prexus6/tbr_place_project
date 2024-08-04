@@ -5,3 +5,4 @@ tzdata==2024.1
 
 python-amazon-simple-product-api~=2.2.11
 requests~=2.32.3
+markdown2~=2.5.0

@@ -1,11 +1,20 @@
+from datetime import datetime
+
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, Avg
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.views.decorators.csrf import csrf_exempt
+
+from literary_works.models import LiteraryWork
 from .forms import MyPromptForm, MyPromptTypeForm
-from .models import Prompt, MyPrompt, FavoriteBook, Book, MyPromptType, Reader
+from .models import Prompt, MyPrompt, FavoriteBook, Book, MyPromptType, Reader, PromptType, Quote, ReadingGoal, \
+    ReadingProgress
 import random
 from django.contrib import messages
-from .utils import save_book_from_open_library, search_books_by_title
-
+from literary_works.models import LiteraryWork
+import json
+from datetime import date
 
 def generate_random_prompt(request):
     """
@@ -34,22 +43,18 @@ def generate_random_prompt(request):
     return context
 
 
-def generate_custom_prompt(request):
+def generate_filtered_prompt(request):
     """
-    Generovanie vlastného náhodného promptu.
+    Generovanie náhodného promptu na základe vybraných typov promptov.
     """
     context = {}
-
-    if not request.user.is_authenticated:
-        messages.warning(request, 'You must be logged in to generate a prompt.')
-        return context
 
     if request.method == 'POST':
         selected_types = request.POST.getlist('selectedTypes[]')
 
         if not selected_types:
             messages.warning(request, 'No prompt types have been selected.')
-            return context
+            return context  # vráti prázdny kontext
 
         prompts = MyPrompt.objects.filter(
             prompt_type__myprompt_type_name__in=selected_types,
@@ -70,6 +75,32 @@ def generate_custom_prompt(request):
 
 
 @login_required
+def generate_custom_prompt(request):
+    """
+    Generovanie vlastného náhodného promptu.
+    """
+    if request.method == 'POST':
+        selected_types = request.POST.getlist('selectedTypes[]')
+
+        if not selected_types:
+            return JsonResponse({'generated_prompt': 'No prompt types have been selected.'}, status=400)
+
+        prompts = MyPrompt.objects.filter(
+            prompt_type__myprompt_type_name__in=selected_types,
+            user=request.user
+        )
+
+        if prompts.exists():
+            random_prompt = random.choice(prompts)
+            generated_prompt = f"Here is your custom prompt: {random_prompt.prompt_name}"
+            return JsonResponse({'generated_prompt': generated_prompt})
+        else:
+            return JsonResponse({'generated_prompt': 'No prompt available for selected types.'}, status=404)
+
+    return JsonResponse({'generated_prompt': 'Invalid request.'}, status=400)
+
+
+@login_required
 def add_my_prompt_type(request):
     form = MyPromptTypeForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
@@ -84,85 +115,80 @@ def add_my_prompt_type(request):
     return {'prompt_type_form': form}
 
 
+
+
 @login_required
 def add_my_prompt(request):
-    form = MyPromptForm(request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        prompt = form.save(commit=False)
-        prompt.user = request.user
-        prompt.save()
-        messages.success(request, 'Prompt successfully added!')
-        return redirect('home')  # Redirect to home to avoid resubmission
-    elif request.method == 'POST':
-        messages.error(request, 'Form is invalid. Please correct the errors.')
+    if request.method == 'POST':
+        form = MyPromptForm(request.POST, user=request.user)  # Posielame aktuálneho používateľa
+        if form.is_valid():
+            prompt = form.save(commit=False)
+            prompt.user = request.user
+            prompt.save()
+            messages.success(request, 'Prompt successfully added!')
+            return redirect('home')  # Redirect to home to avoid resubmission
+        else:
+            messages.error(request, 'Form is invalid. Please correct the errors.')
+    else:
+        form = MyPromptForm(user=request.user)  # Posielame aktuálneho používateľa
 
     prompt_types = MyPromptType.objects.filter(user=request.user)
-    return {'prompt_form': form, 'prompt_types': prompt_types}
+    return render(request, 'index.html', {'prompt_form': form, 'prompt_types': prompt_types})
 
 
-def search_books_and_handle_favorites(request):
-    context = {}
-
-    if request.method == 'POST':
-        if 'title' in request.POST:
-            title = request.POST.get('title')
-            results = search_books_by_title(title)
-            books = results.get('docs', [])
-
-            if not books:
-                messages.info(request, 'Žiadne knihy sa nenašli pre zadaný názov.')
-
-            for book_data in books:
-                book_info = {
-                    "title": book_data.get('title'),
-                    "author_name": book_data.get('author_name', [''])[0],
-                    "genres": book_data.get('subject', []),
-                    "isbn": book_data.get('isbn', [''])[0],
-                    "rating": 0.0,
-                    "cover_url": f"http://covers.openlibrary.org/b/id/{book_data.get('cover_i')}-L.jpg" if book_data.get(
-                        'cover_i') else None
-                }
-                save_book_from_open_library(book_info)
-
-            context['books'] = books
-            messages.success(request, 'Books successfully fetched and saved!')
-        elif 'add_to_favorites' in request.POST:
-            book_id = request.POST.get('book_id')
-            book = get_object_or_404(Book, id=book_id)
-            if FavoriteBook.objects.filter(user=request.user, book=book).exists():
-                messages.info(request, 'Túto knihu už máte v obľúbených.')
-            else:
-                FavoriteBook.objects.create(user=request.user, book=book)
-                messages.success(request, 'Kniha bola pridaná do obľúbených.')
-        elif 'remove_from_favorites' in request.POST:
-            book_id = request.POST.get('book_id')
-            book = get_object_or_404(Book, id=book_id)
-            favorite = FavoriteBook.objects.filter(user=request.user, book=book).first()
-            if favorite:
-                favorite.delete()
-                messages.success(request, 'Kniha bola odstránená z obľúbených.')
-            else:
-                messages.info(request, 'Kniha nebola nájdená v obľúbených.')
-
-    favorites = FavoriteBook.objects.filter(user=request.user)
-    context['favorites'] = favorites
-
-    return context
 
 
 @login_required
-def add_to_favorites(request, book_id):
-    """
-    Pridanie knihy do obľúbených.
-    """
-    print(f"Adding book with ID {book_id} to favorites")  # Debug print
-    book = get_object_or_404(Book, id=book_id)
-    if FavoriteBook.objects.filter(user=request.user, book=book).exists():
-        messages.info(request, 'Túto knihu už máte v obľúbených.')
-    else:
-        FavoriteBook.objects.create(user=request.user, book=book)
-        messages.success(request, 'Kniha bola pridaná do obľúbených.')
-    return redirect('home')
+@csrf_exempt
+def add_to_my_books(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            isbn = data.get('isbn')
+            print(f'Received ISBN: {isbn}')  # Debugovanie
+            if not isbn:
+                return JsonResponse({'success': False, 'message': 'ISBN is missing.'})
+
+            book = Book.objects.get(isbn=isbn)
+            print(f'Found book: {book}')  # Debugovanie
+            user = request.user
+
+            if FavoriteBook.objects.filter(user=user, book=book).exists():
+                return JsonResponse({'success': False, 'message': 'Book already in your collection.'})
+
+            FavoriteBook.objects.create(user=user, book=book)
+            return JsonResponse({'success': True})
+        except Book.DoesNotExist:
+            print('Book not found exception')
+            return JsonResponse({'success': False, 'message': 'Book not found.'})
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'message': 'Invalid JSON data.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+
+
+@login_required
+def get_my_books(request):
+    user = request.user
+    favorite_books = FavoriteBook.objects.filter(user=user)
+    book_list = []
+
+    for favorite in favorite_books:
+        book = favorite.book
+        book_list.append({
+            'title': book.book_title,
+            'author': book.book_author.author_name,
+            'isbn': book.isbn,
+            'cover_url': book.book_cover.url if book.book_cover else '',
+            'rating': book.book_rating,
+        })
+
+    return JsonResponse({'books': book_list}, safe=False)
+
 
 
 @login_required
@@ -180,15 +206,92 @@ def remove_from_favorites(request, book_id):
         messages.info(request, 'Kniha nebola nájdená v obľúbených.')
     return redirect('home')
 
+@login_required
+def edit_prompt(request, prompt_id):
+    """
+    Editovanie existujúceho promptu.
+    """
+    prompt = get_object_or_404(MyPrompt, id=prompt_id, user=request.user)
+    if request.method == 'POST':
+        form = MyPromptForm(request.POST, instance=prompt)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Prompt successfully updated!')
+            return redirect('home')
+    else:
+        form = MyPromptForm(instance=prompt)
+    return render(request, 'edit_prompt.html', {'form': form})
+
+@login_required
+def remove_prompt(request, prompt_id):
+    try:
+        prompt = MyPrompt.objects.get(id=prompt_id, user=request.user)
+        prompt.delete()
+        messages.success(request, 'Prompt successfully removed!')
+    except MyPrompt.DoesNotExist:
+        messages.error(request, 'Prompt not found or you do not have permission to delete it.')
+
+    return redirect('home')
+
+
+def random_quote(request):
+    if request.method == "GET":
+        quotes = list(Quote.objects.all())
+        if not quotes:
+            return JsonResponse({"error": "No quotes found"}, status=404)
+        quote = random.choice(quotes)
+        return JsonResponse({"text": quote.text, "author": quote.author})
+    else:
+        return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+def goal_list(request):
+    goals = ReadingGoal.objects.filter(user=request.user)
+    return render(request, 'index.html', {'goals': goals})
+
+
+@login_required
+def update_goal(request, id):
+    if request.method == "POST":
+        try:
+            goal = get_object_or_404(ReadingGoal, id=id, user=request.user)
+            new_amount = int(request.POST.get('current_amount', 0))
+
+            # Pridaj nový záznam do ReadingProgress
+            ReadingProgress.objects.create(
+                goal=goal,
+                date=date.today(),
+                amount=new_amount
+            )
+
+            # Spočítaj celkový pokrok
+            total_progress = ReadingProgress.objects.filter(goal=goal).aggregate(Sum('amount'))['amount__sum'] or 0
+
+            return JsonResponse({
+                'success': True,
+                'new_amount': total_progress,
+                'percentage': goal.progress_percentage()
+            })
+        except Exception as e:
+            print(f"Error: {e}")  # Log error to console
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    return JsonResponse({'success': False}, status=400)
+
 
 @login_required
 def home_view(request):
     """ Hlavná stránka """
     context = {}
 
+    filter_prompt_type = request.GET.get('filter_prompt_type')
+
     if request.method == 'POST':
         if 'generate_prompt' in request.POST:
             result = generate_random_prompt(request)
+            if isinstance(result, dict):
+                context.update(result)
+        elif 'generate_filtered_prompt' in request.POST:
+            result = generate_filtered_prompt(request)
             if isinstance(result, dict):
                 context.update(result)
         elif 'selectedTypes[]' in request.POST:
@@ -203,14 +306,36 @@ def home_view(request):
             result = add_my_prompt_type(request)
             if isinstance(result, dict):
                 context.update(result)
-        else:
-            result = search_books_and_handle_favorites(request)
-            if isinstance(result, dict):
-                context.update(result)
+        # else:
+            # result = search_books_and_handle_favorites(request)
+            # if isinstance(result, dict):
+            #     context.update(result)
+
+    works = LiteraryWork.objects.all()
+    for work in works:
+        work.average_rating = work.ratings.aggregate(average=Avg('rating')).get('average')
+
+    context['works'] = works
     favorites = FavoriteBook.objects.filter(user=request.user)
     context['favorites'] = favorites
+    context['all_prompt_types'] = PromptType.objects.all()
+    context['prompt_form'] = MyPromptForm(user=request.user)
+
     context['prompt_types'] = MyPromptType.objects.filter(user=request.user)
-    context['prompt_form'] = MyPromptForm()
     context['prompt_type_form'] = MyPromptTypeForm()
+    favorites = FavoriteBook.objects.filter(user=request.user)
+    context['favorites'] = favorites
+
+    goals = ReadingGoal.objects.filter(user=request.user)
+    context['goals'] = goals
+    user_prompts = MyPrompt.objects.filter(user=request.user)
+    if filter_prompt_type:
+        user_prompts = user_prompts.filter(prompt_type_id=filter_prompt_type)
+    context['user_prompts'] = user_prompts
+    context['filter_prompt_type'] = filter_prompt_type
 
     return render(request, 'index.html', context)
+
+
+
+

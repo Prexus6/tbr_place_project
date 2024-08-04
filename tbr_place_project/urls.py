@@ -1,23 +1,37 @@
+"""
+URL configuration for tbr_place_project project.
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/5.0/topics/http/urls/
+Examples:
+Function views
+    1. Add an import:  from my_app import views
+    2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+    1. Add an import:  from other_app.views import Home
+    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+    1. Import the include() function: from django.urls import include, path
+    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+
+from django.urls import include
 from django.contrib import admin
-from django.urls import path, include
-from accounts import views as accounts_views
-from tbr_place import utils, views
-from tbr_place.views import add_my_prompt
+from django.urls import path
+from django.conf.urls.static import static
+from django.conf import settings
+
+from tbr_place import utils
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('', accounts_views.index_view, name='index'),
-    path('search-books-bytitle/<title>/', utils.search_books_by_title),
-    path('', views.home_view, name='home'),
+                  path("admin/", admin.site.urls),
+                  path('accounts/', include('accounts.urls')),
+                  path('', include('tbr_place.urls')),
+                  path('literary-works/', include('literary_works.urls')),
+                  path('api/', include('literary_works.urls')),
 
+              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-    path('remove-from-favorites/<int:book_id>/', views.remove_from_favorites, name='remove_from_favorites'),
-    path('generate-random-prompt/', views.generate_random_prompt, name='generate_random_prompt'),
-    path('generate-custom-prompt/', views.generate_custom_prompt, name='generate_custom_prompt'),
-    path('add-my-prompt/', add_my_prompt, name='add_my_prompt'),
-    path('search-books/', views.search_books_and_handle_favorites, name='search_books_view'),
-    path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('search-books-bytitle/<title>/', utils.search_books_by_title),
-]
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
