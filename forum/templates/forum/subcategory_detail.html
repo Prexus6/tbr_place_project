@@ -1,12 +1,22 @@
-{% extends "base.html" %}
-
-{% block title %}Subcategory Detail{% endblock %}
-
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subcategory.name }}</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
     <h1>{{ subcategory.name }}</h1>
+    <p>{{ subcategory.description }}</p>
+
+    <h2>Threads</h2>
     <ul>
-        {% for thread in threads %}
-            <li>{{ thread.title }}</li>
+        {% for thread in subcategory.thread_set.all %}
+            <li><a href="{% url 'thread_detail' thread.pk %}">{{ thread.title }}</a></li>
         {% endfor %}
     </ul>
-{% endblock %}
+
+    <a href="{% url 'forum_home' %}">Back to Forum Home</a>
+</body>
+</html>

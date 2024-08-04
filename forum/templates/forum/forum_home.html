@@ -1,12 +1,22 @@
-{% extends "base.html" %}
+{% if user.is_authenticated %}
+    <h2>Moje vlákna</h2>
+    {% if user_threads %}
+        <ul>
+            {% for thread in user_threads %}
+                <li><a href="{% url 'thread_detail' thread.pk %}">{{ thread.title }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Nemáte žádná vlákna.</p>
+    {% endif %}
+{% else %}
+    <p>Prosím, přihlaste se, abyste viděli své vlákna.</p>
+{% endif %}
 
-{% block title %}Forum Home{% endblock %}
-
-{% block content %}
-    <h1>Welcome to the Forum</h1>
-    <ul>
-        {% for category in categories %}
-            <li>{{ category.name }}</li>
-        {% endfor %}
-    </ul>
-{% endblock %}
+<h2>Všechna vlákna</h2>
+<ul>
+    {% for thread in threads %}
+        <li><a href="{% url 'thread_detail' thread.pk %}">{{ thread.title }}</a></li>
+    {% endfor %}
+</ul>
+<a href="{% url 'create_thread' %}">Vytvořit nové vlákno</a>
