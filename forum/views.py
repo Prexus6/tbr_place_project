@@ -18,11 +18,11 @@ def forum_home(request):
 
 def thread_detail_view(request, pk):
     thread = get_object_or_404(Thread, pk=pk)
-    posts = thread.posts.all()  # Použijeme related_name 'posts' místo 'post_set'
+    posts = thread.posts.all()
     form = PostForm()
     if request.method == 'POST':
         if not request.user.is_authenticated:
-            return redirect('login')  # Přesměrování na přihlašovací stránku, pokud uživatel není přihlášen
+            return redirect('login')
         form = PostForm(request.POST)
         if form.is_valid():
             post = form.save(commit=False)
@@ -48,6 +48,8 @@ def create_thread_view(request):
 @login_required
 def edit_thread_view(request, pk):
     thread = get_object_or_404(Thread, pk=pk)
+    if request.user != thread.author:
+        return redirect('forum_home')
     if request.method == 'POST':
         form = ThreadForm(request.POST, instance=thread)
         if form.is_valid():
@@ -55,11 +57,13 @@ def edit_thread_view(request, pk):
             return redirect('thread_detail', pk=thread.pk)
     else:
         form = ThreadForm(instance=thread)
-    return render(request, 'forum/edit_thread.html', {'form': form})
+    return render(request, 'forum/edit_thread.html', {'form': form, 'thread': thread})
 
 @login_required
 def delete_thread_view(request, pk):
     thread = get_object_or_404(Thread, pk=pk)
+    if request.user != thread.author:
+        return redirect('forum_home')
     if request.method == 'POST':
         thread.delete()
         return redirect('forum_home')
@@ -68,6 +72,8 @@ def delete_thread_view(request, pk):
 @login_required
 def edit_post_view(request, pk):
     post = get_object_or_404(Post, pk=pk)
+    if request.user != post.author:
+        return redirect('forum_home')
     if request.method == 'POST':
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
@@ -75,11 +81,13 @@ def edit_post_view(request, pk):
             return redirect('thread_detail', pk=post.thread.pk)
     else:
         form = PostForm(instance=post)
-    return render(request, 'forum/edit_post.html', {'form': form})
+    return render(request, 'forum/edit_post.html', {'form': form, 'post': post})
 
 @login_required
 def delete_post_view(request, pk):
     post = get_object_or_404(Post, pk=pk)
+    if request.user != post.author:
+        return redirect('forum_home')
     if request.method == 'POST':
         post.delete()
         return redirect('thread_detail', pk=post.thread.pk)
