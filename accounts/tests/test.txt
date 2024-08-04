@@ -1,0 +1,11 @@
+(.venv) PS C:\Users\okriz\tbr_place_project> python manage.py test accounts.tests.test_views
+Found 6 test(s).
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+......
+----------------------------------------------------------------------
+Ran 6 tests in 3.712s
+
+OK
+Destroying test database for alias 'default'...
+(.venv) PS C:\Users\okriz\tbr_place_project>

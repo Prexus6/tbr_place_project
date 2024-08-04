@@ -5,14 +5,14 @@
     font-weight: bold;
     text-align: center;
     color: #fff;
-    background-color: #007bff;
+    background-color: #a1baa2;
     border-radius: 5px;
     text-decoration: none;
     transition: background-color 0.3s ease;
 }
 
 .btn:hover {
-    background-color: #0056b3;
+    background-color: #779278;
 }
 
 .literary-works-section {
@@ -141,3 +141,5 @@
 .pagination-container button:hover:not(:disabled) {
     background-color: #ddd;
 }
+
+

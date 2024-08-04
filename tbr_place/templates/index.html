@@ -188,47 +188,111 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="div0302-myprompts">
             <h3 class="QuickPromptGenTitle">My Prompts</h3>
             <table>
-            <thead>
-                <tr>
-                    <th>Prompt Name</th>
-                    <th>Type</th>
-                    <th>Edit</th>
-                    <th>Remove</th>
-                </tr>
-            </thead>
+                <thead>
+                    <tr>
+                        <th>Prompt Name</th>
+                        <th>Type</th>
+                        <th>Edit</th>
+                        <th>Remove</th>
+                    </tr>
+                </thead>
                 <tbody>
                     {% for prompt in user_prompts %}
-                       <tr>
-                            <td>{{ prompt.prompt_name }}</td>
-                            <td>{{ prompt.prompt_type.myprompt_type_name }}</td>
-                            <td>
-                                <a href="{% url 'edit_prompt' prompt.id %}">Edit</a>
-                            </td>
-                            <td>
-                                <form method="post" action="{% url 'remove_prompt' prompt.id %}" style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit">Remove</button>
-                                </form>
-                            </td>
-                        </tr>
+                    <tr>
+                        <td>{{ prompt.prompt_name }}</td>
+                        <td>{{ prompt.prompt_type.myprompt_type_name }}</td>
+                        <td>
+                            <a href="{% url 'edit_prompt' prompt.id %}" class="btn-edit">Edit</a>
+                        </td>
+                        <td>
+                            <form method="post" action="{% url 'remove_prompt' prompt.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-remove">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
                     {% empty %}
-                        <tr>
-                            <td colspan="4">No prompts available.</td>
-                        </tr>
+                    <tr>
+                        <td colspan="4" class="no-prompts">No prompts available.</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
       </div>
-    </div>
 
-    </div>
+          <style>
+                  .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #a1baa2;
+            color: #fff;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:hover {
+            background-color: #d3e2e3;
+        }
+
+        .btn-edit, .btn-remove {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-edit {
+            background-color: #4caf50;
+        }
+
+        .btn-remove {
+            background-color: #f44336;
+        }
+
+        .btn-edit:hover {
+            background-color: #45a049;
+        }
+
+        .btn-remove:hover {
+            background-color: #e53935;
+        }
+
+        form {
+            display: inline;
+        }
+
+        .no-prompts {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
 
 
     <!-- Generovanie vlastného promptu na základe vybraných typov -->
-   <div class="div03-prompts" id="prompts-section">
-    <div class="div0301-predefprompts">
+
         <div class="QuickPromptGenerator">
             <div class="div0304-generate-prompt">
                 <h3 class="QuickPromptGenTitle">Generate Custom Prompt</h3>
@@ -249,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         </div>
-
+    </div>
 
 
 <script>
@@ -275,33 +339,58 @@ $(document).ready(function() {
 </script>
 
      <!-------------- Random Quote Generator Section ---------------->
-    <div class="quote-generator">
-        <h3>Random Quote Generator</h3>
-        <button id="generateQuote">Get a Random Quote</button>
-        <div id="quoteDisplay" class="quote-display"></div>
-    </div>
+    <div class="div03-prompts" id="prompts-section">
+        <div class="div0301-predefprompts">
+           <div class="quote-generator">
+            <h3>Random Quote Generator</h3>
+            <button id="generateQuote">Get a Random Quote</button>
+            <div id="quoteDisplay" class="quote-display"></div>
+        </div>
 
-<style>/* styles.css */
-.quote-generator {
-    text-align: center;
-    margin: 20px;
-}
+  <style>
 
-.quote-display {
-    margin-top: 20px;
-    font-size: 1.2em;
-    font-style: italic;
-}
-.quote-display {
-    transition: opacity 0.5s ease-in-out;
-    opacity: 0;
-}
 
-.quote-display.visible {
-    opacity:7;
-}
+        .quote-generator {
+            text-align: center;
+        }
 
-</style>
+        .quote-generator h3 {
+            color: #2d342d;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        #generateQuote {
+            background-color: #c4a59d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #generateQuote:hover {
+            background-color: #a88b84;
+        }
+
+        .quote-display {
+            margin-top: 20px;
+
+            color: #333;
+            border-left: 4px solid  #a1baa2;
+            padding-left: 20px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 0;
+        }
+
+        .quote-display.visible {
+            opacity: 1;
+        }
+    </style>
 
         <script>
           document.getElementById('generateQuote').addEventListener('click', function() {
@@ -416,8 +505,52 @@ $(document).ready(function() {
 <!------------------------ pätička---------------------------->
 
     <div class="div05-footer"></div>
-    <script src="script.js"></script>
+{#        <button id="scrollToTopBtn" class="btn btn-primary" title="Go to top">⇧#}
+{#    <script src="script.js"></script>#}
+{#<script>#}
+{# document.addEventListener('DOMContentLoaded', function () {#}
+{#    var scrollToTopBtn = document.getElementById('scrollToTopBtn');#}
+{##}
+{#
+{#    window.addEventListener('scroll', function () {#}
+{#        if (window.scrollY > 300) {#}
+{#            scrollToTopBtn.style.display = 'block';#}
+{#        } else {#}
+{#            scrollToTopBtn.style.display = 'none';#}
+{#        }#}
+{#    });#}
+{##}
+{##}
+{#    scrollToTopBtn.addEventListener('click', function () {#}
+{#        window.scrollTo({ top: 0, behavior: 'smooth' });#}
+{#    });#}
+{#});#}
+{##}
+{#</script>#}
+
+ <style>
+#scrollToTopBtn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: none; /
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 20px;
+    z-index: 1000;
+}
+
+#scrollToTopBtn:hover {
+    background-color: #1b5209;
+}
 
 
-  </body>
+
+</style>
+
+</body>
 </html>

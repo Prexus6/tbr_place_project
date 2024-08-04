@@ -1,32 +1,44 @@
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+
+from tbr_place_project import settings
+
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, username, password=None, **extra_fields):
+        if not username:
+            raise ValueError("The Username field must be set")
+        user = self.model(username=username, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        return self.create_user(username, password, **extra_fields)
 
 class CustomUser(AbstractUser):
-    groups = models.ManyToManyField(
-        Group,
-        related_name='customuser_set',  # Přidání related_name
-        blank=True,
-        help_text=('The groups this user belongs to. A user will get all permissions '
-                   'granted to each of their groups.'),
-        related_query_name='customuser'
-    )
-    user_permissions = models.ManyToManyField(
-        Permission,
-        related_name='customuser_set',  # Přidání related_name
-        blank=True,
-        help_text='Specific permissions for this user.',
-        related_query_name='customuser'
-    )
+    favorite_book = models.CharField(max_length=100, blank=True, null=True)
+    secret_question = models.CharField(max_length=255,  blank=True, null=True)
+    secret_answer = models.CharField(max_length=255)
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.username
 
-class BrowsingHistory(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    url = models.URLField()
-    timestamp = models.DateTimeField(auto_now_add=True)
+class UserHistory(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    history_data = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f'{self.user.username} - {self.history_data} - {self.created_at}'
 
 
 
