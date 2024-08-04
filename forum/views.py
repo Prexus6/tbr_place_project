@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
 from .models import Thread, Post, Category
 from .forms import ThreadForm, PostForm
 
@@ -48,8 +48,8 @@ def create_thread_view(request):
 @login_required
 def edit_thread_view(request, pk):
     thread = get_object_or_404(Thread, pk=pk)
-    if request.user != thread.author:
-        return redirect('forum_home')
+    if thread.author != request.user:
+        raise PermissionDenied
     if request.method == 'POST':
         form = ThreadForm(request.POST, instance=thread)
         if form.is_valid():
@@ -57,13 +57,13 @@ def edit_thread_view(request, pk):
             return redirect('thread_detail', pk=thread.pk)
     else:
         form = ThreadForm(instance=thread)
-    return render(request, 'forum/edit_thread.html', {'form': form, 'thread': thread})
+    return render(request, 'forum/edit_thread.html', {'form': form})
 
 @login_required
 def delete_thread_view(request, pk):
     thread = get_object_or_404(Thread, pk=pk)
-    if request.user != thread.author:
-        return redirect('forum_home')
+    if thread.author != request.user:
+        raise PermissionDenied
     if request.method == 'POST':
         thread.delete()
         return redirect('forum_home')
@@ -72,8 +72,8 @@ def delete_thread_view(request, pk):
 @login_required
 def edit_post_view(request, pk):
     post = get_object_or_404(Post, pk=pk)
-    if request.user != post.author:
-        return redirect('forum_home')
+    if post.author != request.user:
+        raise PermissionDenied
     if request.method == 'POST':
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
@@ -81,13 +81,13 @@ def edit_post_view(request, pk):
             return redirect('thread_detail', pk=post.thread.pk)
     else:
         form = PostForm(instance=post)
-    return render(request, 'forum/edit_post.html', {'form': form, 'post': post})
+    return render(request, 'forum/edit_post.html', {'form': form})
 
 @login_required
 def delete_post_view(request, pk):
     post = get_object_or_404(Post, pk=pk)
-    if request.user != post.author:
-        return redirect('forum_home')
+    if post.author != request.user:
+        raise PermissionDenied
     if request.method == 'POST':
         post.delete()
         return redirect('thread_detail', pk=post.thread.pk)

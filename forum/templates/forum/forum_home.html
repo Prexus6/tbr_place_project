@@ -1,21 +1,16 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Forum Home</h1>
+    <h1>Forum Home</h1>
 
-{% if user.is_authenticated %}
     <h2>My Threads</h2>
     {% if user_threads %}
         <ul>
             {% for thread in user_threads %}
                 <li>
                     <a href="{% url 'thread_detail' thread.pk %}">{{ thread.title }}</a>
-                    <!-- Odkazy pro úpravu a mazání vláken -->
                     <a href="{% url 'edit_thread' thread.pk %}">Edit</a>
-                    <form action="{% url 'delete_thread' thread.pk %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit">Delete</button>
-                    </form>
+                    <a href="{% url 'delete_thread' thread.pk %}">Delete</a>
                 </li>
             {% endfor %}
         </ul>
@@ -29,27 +24,18 @@
             {% for thread in commented_threads %}
                 <li>
                     <a href="{% url 'thread_detail' thread.pk %}">{{ thread.title }}</a>
-                    <!-- Odkazy pro úpravu a mazání komentářů -->
-                    <a href="{% url 'edit_thread' thread.pk %}">Edit</a>
-                    <form action="{% url 'delete_thread' thread.pk %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit">Delete</button>
-                    </form>
                 </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>You have not commented on any threads.</p>
+        <p>You have no commented threads.</p>
     {% endif %}
-{% else %}
-    <p>Please log in to see your threads and commented threads.</p>
-{% endif %}
 
-<h2>All Threads</h2>
-<ul>
-    {% for thread in threads %}
-        <li><a href="{% url 'thread_detail' thread.pk %}">{{ thread.title }}</a></li>
-    {% endfor %}
-</ul>
-<a href="{% url 'create_thread' %}">Create new thread</a>
+    <h2>All Threads</h2>
+    <ul>
+        {% for thread in threads %}
+            <li><a href="{% url 'thread_detail' thread.pk %}">{{ thread.title }}</a></li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'create_thread' %}">Create new thread</a>
 {% endblock %}

@@ -1,24 +1,26 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ thread.title }}{% endblock %}
-
 {% block content %}
-<h1>{{ thread.title }}</h1>
-<p>{{ thread.content }}</p>
-<p>Author: {{ thread.author }}</p>
-<p>Date: {{ thread.created_at }}</p>
+    <h1>{{ thread.title }}</h1>
+    <p>{{ thread.content }}</p>
+    <p>By {{ thread.author }}</p>
 
-<h2>Posts</h2>
-<ul>
+    <h2>Posts</h2>
     {% for post in posts %}
-        <li>{{ post.content }} - {{ post.author }} ({{ post.created_at }})</li>
+        <div>
+            <p>{{ post.content }}</p>
+            <p>By {{ post.author }}</p>
+            {% if post.author == user %}
+                <a href="{% url 'edit_post' post.pk %}">Edit</a>
+                <a href="{% url 'delete_post' post.pk %}">Delete</a>
+            {% endif %}
+        </div>
     {% endfor %}
-</ul>
 
-<h2>Add a Post</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Submit</button>
-</form>
+    <h2>Add a post</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Post</button>
+    </form>
 {% endblock %}
