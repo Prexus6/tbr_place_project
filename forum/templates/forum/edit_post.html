@@ -1,14 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Post</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Edit Post{% endblock %}
+
+{% block content %}
     <h1>Edit Post</h1>
     <form method="post">
         {% csrf_token %}
         <textarea name="content">{{ post.content }}</textarea><br>
         <button type="submit">Edit Post</button>
     </form>
-</body>
-</html>
+{% endblock %}

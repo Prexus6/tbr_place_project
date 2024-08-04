@@ -1,9 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Thread</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Create Thread{% endblock %}
+
+{% block content %}
     <h1>Create Thread</h1>
     <form method="post">
         {% csrf_token %}
@@ -15,5 +14,4 @@
         </select><br>
         <button type="submit">Create Thread</button>
     </form>
-</body>
-</html>
+{% endblock %}

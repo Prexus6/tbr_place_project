@@ -1,0 +1,21 @@
+C:\Users\okriz\tbr_place_project\.venv\Scripts\python.exe "C:/Program Files/JetBrains/PyCharm 2024.1.4/plugins/python/helpers/pycharm/_jb_pytest_runner.py" --path C:\Users\okriz\tbr_place_project\forum\test_urls.py
+Testing started at 7:15 ...
+Launching pytest with arguments C:\Users\okriz\tbr_place_project\forum\test_urls.py --no-header --no-summary -q in C:\Users\okriz\tbr_place_project\tbr_place_project
+
+============================= test session starts =============================
+collecting ... collected 10 items
+
+..\forum\test_urls.py::test_forum_home_url_is_resolved
+..\forum\test_urls.py::test_category_detail_url_is_resolved
+..\forum\test_urls.py::test_subcategory_detail_url_is_resolved
+..\forum\test_urls.py::test_thread_detail_url_is_resolved
+..\forum\test_urls.py::test_create_thread_url_is_resolved
+..\forum\test_urls.py::test_edit_post_url_is_resolved
+..\forum\test_urls.py::test_delete_post_url_is_resolved
+..\forum\test_urls.py::test_vote_post_url_is_resolved
+..\forum\test_urls.py::test_report_post_url_is_resolved
+..\forum\test_urls.py::test_search_results_url_is_resolved
+
+============================= 10 passed in 0.53s ==============================
+PASSED            [ 10%]PASSED       [ 20%]PASSED    [ 30%]PASSED         [ 40%]PASSED         [ 50%]PASSED             [ 60%]PASSED           [ 70%]PASSED             [ 80%]PASSED           [ 90%]PASSED        [100%]
+Process finished with exit code 0

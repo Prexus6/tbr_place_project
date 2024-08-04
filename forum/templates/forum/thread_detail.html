@@ -1,19 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Thread Detail</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Thread Detail{% endblock %}
+
+{% block content %}
     <h1>{{ thread.title }}</h1>
     <ul>
-        {% for post in thread.posts.all %}
-            <li>{{ post.content }} - {{ post.author }}</li>
+        {% for post in posts %}
+            <li>{{ post.content }}</li>
         {% endfor %}
     </ul>
-    <form method="post" action="{% url 'edit_post' post.pk %}">
-        {% csrf_token %}
-        <textarea name="content">{{ post.content }}</textarea><br>
-        <button type="submit">Edit Post</button>
-    </form>
-</body>
-</html>
+{% endblock %}

@@ -8,16 +8,15 @@ class Category(models.Model):
         return self.name
 
 class Subcategory(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
 
 class Thread(models.Model):
+    title = models.CharField(max_length=100)
     subcategory = models.ForeignKey(Subcategory, on_delete=models.CASCADE)
-    title = models.CharField(max_length=200)
-    created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -26,8 +25,8 @@ class Thread(models.Model):
 class Post(models.Model):
     thread = models.ForeignKey(Thread, on_delete=models.CASCADE)
     content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.content[:20]
+        return self.content

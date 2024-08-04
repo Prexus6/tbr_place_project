@@ -1,14 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Subcategory Detail</title>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Subcategory Detail{% endblock %}
+
+{% block content %}
     <h1>{{ subcategory.name }}</h1>
     <ul>
-        {% for thread in subcategory.threads.all %}
-            <li><a href="{% url 'thread_detail' thread.pk %}">{{ thread.title }}</a></li>
+        {% for thread in threads %}
+            <li>{{ thread.title }}</li>
         {% endfor %}
     </ul>
-</body>
-</html>
+{% endblock %}
