@@ -1,18 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ thread.title }}{% endblock %}
+
+{% block content %}
 <h1>{{ thread.title }}</h1>
 <p>{{ thread.content }}</p>
-<p>Autor: {{ thread.author }}</p>
-<p>Datum: {{ thread.created_at }}</p>
+<p>Author: {{ thread.author }}</p>
+<p>Date: {{ thread.created_at }}</p>
 
-<h2>Příspěvky</h2>
+<h2>Posts</h2>
 <ul>
     {% for post in posts %}
         <li>{{ post.content }} - {{ post.author }} ({{ post.created_at }})</li>
     {% endfor %}
 </ul>
 
-<h2>Přidat příspěvek</h2>
+<h2>Add a Post</h2>
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Odeslat</button>
+    <button type="submit">Submit</button>
 </form>
+{% endblock %}

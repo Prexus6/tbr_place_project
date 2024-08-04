@@ -8,17 +8,17 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Edit Post</title>
+        <title>Delete Post</title>
         <link rel="stylesheet" href="{% static 'styles.css' %}">
     </head>
     <body>
-        <h1>Edit Post</h1>
+        <h1>Delete Post</h1>
+        <p>Are you sure you want to delete this post?</p>
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Save</button>
+            <button type="submit">Yes, delete</button>
         </form>
-        <a href="{% url 'thread_detail' form.instance.thread.pk %}">Back to Thread</a>
+        <a href="{% url 'thread_detail' post.thread.pk %}">Cancel</a>
     </body>
     </html>
 {% endblock %}

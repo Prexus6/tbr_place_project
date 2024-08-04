@@ -1,21 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ category.name }}</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block content %}
     <h1>{{ category.name }}</h1>
     <p>{{ category.description }}</p>
-
-    <h2>Subcategories</h2>
-    <ul>
-        {% for subcategory in category.subcategory_set.all %}
-            <li><a href="{% url 'subcategory_detail' subcategory.pk %}">{{ subcategory.name }}</a></li>
-        {% endfor %}
-    </ul>
 
     <h2>Threads</h2>
     <ul>
@@ -25,5 +12,4 @@
     </ul>
 
     <a href="{% url 'forum_home' %}">Back to Forum Home</a>
-</body>
-</html>
+{% endblock %}
