@@ -3,7 +3,7 @@ from django.db import models
 
 from tbr_place_project import settings
 
-
+# Správce uživatelů pro vlastní uživatelský model
 class CustomUserManager(BaseUserManager):
     def create_user(self, username, password=None, **extra_fields):
         if not username:
@@ -19,10 +19,11 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(username, password, **extra_fields)
 
+# Vlastní uživatelský model rozšiřující AbstractUser
 class CustomUser(AbstractUser):
-    favorite_book = models.CharField(max_length=100, blank=True, null=True)
-    secret_question = models.CharField(max_length=255)
-    secret_answer = models.CharField(max_length=255)
+    favorite_book = models.CharField(max_length=100, blank=True, null=True)  # Oblíbená kniha uživatele
+    secret_question = models.CharField(max_length=255)  # Bezpečnostní otázka
+    secret_answer = models.CharField(max_length=255)  # Odpověď na bezpečnostní otázku
 
     objects = CustomUserManager()
 
@@ -32,13 +33,11 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.username
 
+# Model pro uchovávání historie uživatele
 class UserHistory(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    history_data = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Odkaz na uživatele
+    history_data = models.CharField(max_length=255)  # Data historie
+    created_at = models.DateTimeField(auto_now_add=True)  # Datum vytvoření záznamu
 
     def __str__(self):
         return f'{self.user.username} - {self.history_data} - {self.created_at}'
-
-
-

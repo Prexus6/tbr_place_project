@@ -6,6 +6,7 @@ from .forms import CustomUserCreationForm, CustomUserLoginForm, UsernameForm, Se
 
 CustomUser = get_user_model()
 
+# View pro registraci uživatele
 @csrf_protect
 def signup_view(request):
     if request.method == 'POST':
@@ -18,6 +19,7 @@ def signup_view(request):
         form = CustomUserCreationForm()
     return render(request, 'accounts/signup.html', {'form': form})
 
+# View pro přihlášení uživatele
 @csrf_protect
 def login_view(request):
     if request.method == 'POST':
@@ -36,11 +38,13 @@ def login_view(request):
         form = CustomUserLoginForm()
     return render(request, 'accounts/login.html', {'form': form})
 
+# View pro odhlášení uživatele
 @csrf_protect
 def logout_view(request):
     logout(request)
     return redirect('login')
 
+# View pro zapomenuté heslo (zadání uživatelského jména)
 @csrf_protect
 def forgot_password_view(request):
     if request.method == 'POST':
@@ -58,6 +62,7 @@ def forgot_password_view(request):
         form = UsernameForm()
     return render(request, 'accounts/forgot_password.html', {'form': form})
 
+# View pro bezpečnostní otázku
 @csrf_protect
 def security_question_view(request):
     user_id = request.session.get('reset_user_id')
@@ -86,6 +91,7 @@ def security_question_view(request):
 
     return render(request, 'accounts/security_question.html', {'form': form, 'secret_question': user.secret_question})
 
+# View pro resetování hesla
 @csrf_protect
 def reset_password_view(request):
     if request.method == 'POST':
@@ -117,5 +123,3 @@ def reset_password_view(request):
         user = get_object_or_404(CustomUser, id=user_id)
         form = SetNewPasswordForm()
     return render(request, 'accounts/reset_password.html', {'form': form, 'username': user.username})
-
-

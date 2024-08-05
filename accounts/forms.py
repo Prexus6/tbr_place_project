@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import CustomUser
 
+# Formulář pro vytvoření nového uživatele
 class CustomUserCreationForm(UserCreationForm):
     secret_question = forms.CharField(
         max_length=255,
@@ -14,17 +15,21 @@ class CustomUserCreationForm(UserCreationForm):
         model = CustomUser
         fields = ('username', 'password1', 'password2', 'secret_question', 'secret_answer')
 
+# Formulář pro přihlášení uživatele
 class CustomUserLoginForm(AuthenticationForm):
     class Meta:
         model = CustomUser
         fields = ('username', 'password')
 
+# Formulář pro zadání uživatelského jména při zapomenutí hesla
 class UsernameForm(forms.Form):
     username = forms.CharField(max_length=150, required=True)
 
+# Formulář pro odpověď na bezpečnostní otázku
 class SecurityQuestionForm(forms.Form):
     secret_answer = forms.CharField(max_length=255, required=True)
 
+# Formulář pro nastavení nového hesla
 class SetNewPasswordForm(forms.Form):
     new_password1 = forms.CharField(label='New password', widget=forms.PasswordInput, required=True)
     new_password2 = forms.CharField(label='Confirm new password', widget=forms.PasswordInput, required=True)

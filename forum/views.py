@@ -4,6 +4,7 @@ from django.core.exceptions import PermissionDenied
 from .models import Thread, Post, Category
 from .forms import ThreadForm, PostForm
 
+# View pro hlavní stránku fóra
 def forum_home(request):
     categories = Category.objects.all()
     threads = Thread.objects.all()
@@ -16,6 +17,7 @@ def forum_home(request):
         'commented_threads': commented_threads
     })
 
+# View pro detail vlákna
 def thread_detail_view(request, pk):
     thread = get_object_or_404(Thread, pk=pk)
     posts = thread.posts.all()
@@ -32,6 +34,7 @@ def thread_detail_view(request, pk):
             return redirect('thread_detail', pk=thread.pk)
     return render(request, 'forum/thread_detail.html', {'thread': thread, 'posts': posts, 'form': form})
 
+# View pro vytvoření vlákna (přístupné pouze pro přihlášené uživatele)
 @login_required
 def create_thread_view(request):
     if request.method == 'POST':
@@ -45,6 +48,7 @@ def create_thread_view(request):
         form = ThreadForm()
     return render(request, 'forum/create_thread.html', {'form': form})
 
+# View pro editaci vlákna (přístupné pouze pro přihlášené uživatele)
 @login_required
 def edit_thread_view(request, pk):
     thread = get_object_or_404(Thread, pk=pk)
@@ -59,6 +63,7 @@ def edit_thread_view(request, pk):
         form = ThreadForm(instance=thread)
     return render(request, 'forum/edit_thread.html', {'form': form})
 
+# View pro smazání vlákna (přístupné pouze pro přihlášené uživatele)
 @login_required
 def delete_thread_view(request, pk):
     thread = get_object_or_404(Thread, pk=pk)
@@ -69,6 +74,7 @@ def delete_thread_view(request, pk):
         return redirect('forum_home')
     return render(request, 'forum/delete_thread.html', {'thread': thread})
 
+# View pro editaci příspěvku (přístupné pouze pro přihlášené uživatele)
 @login_required
 def edit_post_view(request, pk):
     post = get_object_or_404(Post, pk=pk)
@@ -83,6 +89,7 @@ def edit_post_view(request, pk):
         form = PostForm(instance=post)
     return render(request, 'forum/edit_post.html', {'form': form})
 
+# View pro smazání příspěvku (přístupné pouze pro přihlášené uživatele)
 @login_required
 def delete_post_view(request, pk):
     post = get_object_or_404(Post, pk=pk)
@@ -93,6 +100,7 @@ def delete_post_view(request, pk):
         return redirect('thread_detail', pk=post.thread.pk)
     return render(request, 'forum/delete_post.html', {'post': post})
 
+# View pro detail kategorie
 def category_detail_view(request, pk):
     category = get_object_or_404(Category, pk=pk)
     threads = Thread.objects.filter(category=category)
