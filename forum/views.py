@@ -92,3 +92,8 @@ def delete_post_view(request, pk):
         post.delete()
         return redirect('thread_detail', pk=post.thread.pk)
     return render(request, 'forum/delete_post.html', {'post': post})
+
+def category_detail_view(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    threads = Thread.objects.filter(category=category)
+    return render(request, 'forum/category_detail.html', {'category': category, 'threads': threads})

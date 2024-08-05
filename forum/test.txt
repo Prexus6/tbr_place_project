@@ -19,3 +19,9 @@ collecting ... collected 10 items
 ============================= 10 passed in 0.53s ==============================
 PASSED            [ 10%]PASSED       [ 20%]PASSED    [ 30%]PASSED         [ 40%]PASSED         [ 50%]PASSED             [ 60%]PASSED           [ 70%]PASSED             [ 80%]PASSED           [ 90%]PASSED        [100%]
 Process finished with exit code 0
+
+C:\Users\okriz\tbr_place_project\.venv\Scripts\python.exe "C:/Program Files/JetBrains/PyCharm 2024.1.4/plugins/python/helpers/pycharm/django_test_manage.py" test forum.tests C:\Users\okriz\tbr_place_project
+Testing started at 22:17 ...
+Creating test database for alias 'default'...
+Found 7 test(s).
+System check identified no issues (0 silenced).
