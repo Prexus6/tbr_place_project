@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{{ category.name }}</h1>
+    <p>{{ category.description }}</p>
+
+    <h2>Threads</h2>
+    <ul>
+        {% for thread in category.thread_set.all %}
+            <li><a href="{% url 'thread_detail' thread.pk %}">{{ thread.title }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'forum_home' %}">Back to Forum Home</a>
+{% endblock %}

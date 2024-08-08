@@ -29,6 +29,7 @@ urlpatterns = [
                   path('', include('tbr_place.urls')),
                   path('literary-works/', include('literary_works.urls')),
                   path('api/', include('literary_works.urls')),
+                  path('forum/', include('forum.urls')),
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
