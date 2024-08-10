@@ -54,7 +54,7 @@ url: path('forum/', include('forum.urls')),
 - přihlášení do fora je povinné jinak nemůže komentovat a ni vytvářet vlákna
 
 8. Kontakt:
-email na správce: info@tbrplaceproject.cz
+email na správce: filipchaser@gmail.com, kriz111@email.cz
 9. Contributori: Filip Húšťava, Ondřej Kříž
 
 
