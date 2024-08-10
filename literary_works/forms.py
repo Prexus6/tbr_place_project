@@ -5,7 +5,7 @@ from .models import LiteraryWork, Rating, Comment
 class LiteraryWorkForm(forms.ModelForm):
     class Meta:
         model = LiteraryWork
-        fields = ['title', 'description', 'content', 'image', 'category', 'tags', 'published']
+        fields = ['title', 'description', 'content', 'image', 'category', 'published']
         widgets = {
             'category': forms.Select(),
             'tags': forms.CheckboxSelectMultiple(),

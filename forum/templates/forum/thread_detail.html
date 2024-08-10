@@ -1,28 +1,33 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{{ thread.title }}</h1>
-    <p>{{ thread.content }}</p>
-    <p>By {{ thread.author }}</p>
+<div class="div03-prompts" id="prompts-section">
+    <div class="div0301-predefprompts">
+        <h1>{{ thread.title }}</h1>
+        <p>{{ thread.content }}</p>
+        <p>By {{ thread.author }}</p>
 
-    <h2>Posts</h2>
-    {% for post in posts %}
-        <div>
-            <p>{{ post.content }}</p>
-            <p>By {{ post.author }}</p>
-            {% if post.author == user %}
-                <a href="{% url 'edit_post' post.pk %}">Edit</a>
-                <a href="{% url 'delete_post' post.pk %}">Delete</a>
-            {% endif %}
-        </div>
-    {% endfor %}
+        <h2>Posts</h2>
+        {% for post in posts %}
+            <div>
+                <p>{{ post.content }}</p>
+                <p>By {{ post.author }}</p>
+                {% if post.author == user %}
+                    <br>
+                    <a href="{% url 'edit_post' post.pk %}" class="btn-edit">Edit</a>
+                    <a href="{% url 'delete_post' post.pk %}" class="btn-remove">Delete</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <br>
+        <h2>Add a post</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Post</button>
+        </form>
 
-    <h2>Add a post</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Post</button>
-    </form>
-
-    <a href="{% url 'forum_home' %}">Back to Forum Home</a> <!-- Added link -->
+        <a href="{% url 'forum_home' %}" class= class="main-button-prompts">Back to Forum Home</a> <!-- Added link -->
+    </div>
+</div>
 {% endblock %}

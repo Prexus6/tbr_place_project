@@ -1,12 +1,16 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Edit Thread</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save</button>
-    </form>
+<div class="div03-prompts" id="prompts-section">
+    <div class="div0301-predefprompts">
+        <h1>Edit Thread</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save</button>
+        </form>
 
-    <a href="{% url 'forum_home' %}">Back to Forum Home</a> <!-- Added link -->
+        <a href="{% url 'forum_home' %}">Back to Forum Home</a> <!-- Added link -->
+    </div>
+</div>
 {% endblock %}

@@ -40,6 +40,7 @@
                     <button class="SignBtn" onclick="location.href='{% url 'home' %}'">Home</button>
                     <button class="SignBtn" onclick="location.href='{% url 'user_profile' %}'">Profile</button>
                     <button class="SignBtn" onclick="location.href='{% url 'literary_work_create' %}'">Add New Work</button>
+                    <button class="SignBtn" onclick="location.href='{% url 'forum_home' %}'">Forum</button>
                     <div class="auth-actions">
                         <form method="post" action="{% url 'logout' %}">
                             {% csrf_token %}
@@ -99,42 +100,61 @@
           <div class="display-field01" id="displayField01"> {{ prompt_name }}</div>
         </div>
 
-      <!--------------- FILTERED PROMPTS ----------------->
-     <div class="div0302-quickpromptfilter">
-          <h3 class="QuickPromptFilterTitle">Prompts Filter</h3>
-        <form method="post" action="{% url 'home' %}">
-               {% csrf_token %}
-          <div class="QuickPromptFilterContainer">
-            <div class="QuickPromptSelectBtn">
-              <span class="btn-text">Select prompt types:</span>
-              <span class="arrow-down">
-                <i class="fa-solid fa-chevron-down"></i>
-              </span>
-            </div>
-            <ul class="list-items">
-                {% for prompt_type in all_prompt_types %}
-                <li class="item">
-                    <span class="checkbox">
-                        <input  type="checkbox" name="selectedTypes" value="{{ prompt_type.prompt_type_name }}">
+    <!--------------- FILTERED PROMPTS ----------------->
+    <div class="div0302-quickpromptfilter">
+        <h3 class="QuickPromptFilterTitle">Prompts Filter</h3>
+        <form id="generate-prompt-form" method="post" action="{% url 'generate_filtered_prompt' %}">
+            {% csrf_token %}
+            <div class="QuickPromptFilterContainer">
+                <div class="QuickPromptSelectBtn">
+                    <span class="btn-text">Select prompt types:</span>
+                    <span class="arrow-down">
+                        <i class="fa-solid fa-chevron-down"></i>
                     </span>
-                    <span class="item-text">{{ prompt_type.prompt_type_name }}</span>
-                </li>
-                {% endfor %}
-            </ul>
-          </div>
-          <button class="QuickPromptFilterGenButton" type="submit" name="generate_filtered_prompt">Generate prompt</button>
+                </div>
+                <ul class="list-items">
+                    {% for prompt_type in all_prompt_types %}
+                    <li class="item">
+                        <span class="checkbox">
+                            <input type="checkbox" name="selectedTypes[]" value="{{ prompt_type.prompt_type_name }}">
+                        </span>
+                        <span class="item-text">{{ prompt_type.prompt_type_name }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <button class="QuickPromptFilterGenButton" type="submit">Generate prompt</button>
         </form>
+
         <div class="display-field02" id="displayField02">
-             {% if filtered_prompt_name %}
-                {{ filtered_prompt_name }}
-            {% else %}
-                <p>Please select at least one prompt type to generate a prompt.</p>
-            {% endif %}
+            <!-- Vybrané prompt typy sa zobrazia tu -->
+            <p id="generated-prompt-content">Please select at least one prompt type to generate a prompt.</p>
         </div>
     </div>
 
 
+
+
       <script>
+$(document).ready(function() {
+    $("form#generate-prompt-form").on("submit", function(event) {
+        event.preventDefault();
+
+        $.ajax({
+            type: "POST",
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            success: function(response) {
+                console.log('AJAX Success:', response);
+                $("#displayField02").html(response.generated_prompt);
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX error:", status, error);
+            }
+        });
+    });
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     const selectBtn = document.querySelector('.QuickPromptSelectBtn');
     const listItems = document.querySelector('.list-items');
@@ -143,7 +163,9 @@ document.addEventListener('DOMContentLoaded', function() {
         listItems.classList.toggle('visible');
     });
 });
+
 </script>
+
 
         <style>
             .list-items {
@@ -504,29 +526,32 @@ $(document).ready(function() {
 
 <!------------------------ pätička---------------------------->
 
+
     <div class="div05-footer"></div>
-{#        <button id="scrollToTopBtn" class="btn btn-primary" title="Go to top">⇧#}
-{#    <script src="script.js"></script>#}
-{#<script>#}
-{# document.addEventListener('DOMContentLoaded', function () {#}
-{#    var scrollToTopBtn = document.getElementById('scrollToTopBtn');#}
-{##}
-{#
-{#    window.addEventListener('scroll', function () {#}
-{#        if (window.scrollY > 300) {#}
-{#            scrollToTopBtn.style.display = 'block';#}
-{#        } else {#}
-{#            scrollToTopBtn.style.display = 'none';#}
-{#        }#}
-{#    });#}
-{##}
-{##}
-{#    scrollToTopBtn.addEventListener('click', function () {#}
-{#        window.scrollTo({ top: 0, behavior: 'smooth' });#}
-{#    });#}
-{#});#}
-{##}
-{#</script>#}
+        <button id="scrollToTopBtn" class="btn btn-primary" title="Go to top">⇧</button>
+    <script src="script.js"></script>
+
+<script>
+ document.addEventListener('DOMContentLoaded', function () {
+    var scrollToTopBtn = document.getElementById('scrollToTopBtn');
+
+
+    window.addEventListener('scroll', function () {
+        if (window.scrollY > 300) {
+            scrollToTopBtn.style.display = 'block';
+        } else {
+            scrollToTopBtn.style.display = 'none';
+        }
+    });
+
+
+    scrollToTopBtn.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+});
+
+</script>
+
 
  <style>
 #scrollToTopBtn {

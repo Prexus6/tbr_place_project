@@ -8,6 +8,9 @@
     <title>TBR Place</title>
       <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/literary_works.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/book_section.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/table_edit_delete.css' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -34,6 +37,7 @@
                     <button class="SignBtn" onclick="location.href='{% url 'home' %}'">Home</button>
                     <button class="SignBtn" onclick="location.href='{% url 'user_profile' %}'">Profile</button>
                     <button class="SignBtn" onclick="location.href='{% url 'literary_work_create' %}'">Add New Work</button>
+                    <button class="SignBtn" onclick="location.href='{% url 'forum_home' %}'">Forum</button>
                     <div class="auth-actions">
                         <form method="post" action="{% url 'logout' %}">
                             {% csrf_token %}
