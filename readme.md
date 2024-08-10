@@ -35,22 +35,26 @@ url: path('api/', include('literary_works.urls')),
 - sekce náhledu uživatelských vlastních literárních prací - filtrování podle kategorií, filtrace zobrazení podle datumu, podle hodnocení, podle nejvíce hodnocených,
   (defaultně je všechno zařazené podle datumu), tlačítko pro přidaní nové uživatelovi literární práce, zobrazené díla obsahují autora(uživatelský autor), kategorii(díla, průměrné hodnocení díla, počet hodnocení díla, počet komentářů, možnost read more)
 - sekce read more - pokud se jedná o dílo uživatelě má možnost dílo editovat(zakomponovaná možnost použití formátování přes markdown) nebo mazat(zabezpečené výzvou zadání uživatelského hesla), odpovědět na komentáře jiných uživatelů,
-- sekce přidávání uživatelského díla uživatelů - možnost zadat název a kraátký popis díla, možnost vložení obsahu díla, možnost přidání fotky díla, možnost zařazení do kategorie, 
+- sekce přidávání uživatelského díla uživatelů - možnost zadat název a krátký popis díla, možnost vložení obsahu díla, možnost přidání fotky díla, možnost zařazení do kategorie, 
 - sekce uživatelského profilu - jedná se o náhled zobrazení všech uživatelových jeho vlastních literárních prací a děl, možnost přímého přidávání děl, možnost přístupu ke svým dílům a jejich upravování
 - 
 
 accounts: stará se o registraci a přihlšování uživatelů
 url: path('accounts/', include('accounts.urls')),
-- obsahuje možnost přihlášení uživatele, odhlášení, obnovy hesla, nastavení tajné otázky místo registrace emailem,
-nastavení nového hesla, registrace nového uživatele, resetování hesla, (povinné nastavení security question))
+- obsahuje možnost přihlášení uživatele, odhlášení, obnovy hesla 
+- nastavení tajné otázky místo registrace emailem
+- nastavení nového hesla, 
+- registrace nového uživatele, 
+- resetování hesla, (povinné nastavení security question)
 
 forum: diskuzní forum na jakékoliv téma dostupné pro registraci
 url: path('forum/', include('forum.urls')),
 - obsahuje možnost přidání příspěvku, editování, mazání, možnost komentovat příspěvky
 - uživatel může vidět i přispěvky které komentoval a upravovat komentáře, pod každým uživatelem je uložena jeho historie na forumu
+- přihlášení do fora je povinné jinak nemůže komentovat a ni vytvářet vlákna
 
 8. Kontakt:
-email na správce:
+email na správce: info@tbrplaceproject.cz
 9. Contributori: Filip Húšťava, Ondřej Kříž
 
 
