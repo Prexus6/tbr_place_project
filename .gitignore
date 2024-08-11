@@ -2,3 +2,5 @@
 /db.sqlite3
 /tbr_place_project_ondra/settings.py
 /venv/
+/accounts/migrations/__pycache__/*
+/literary_works/migrations/__pycache__/*
