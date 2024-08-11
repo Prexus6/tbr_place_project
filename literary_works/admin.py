@@ -1,5 +1,5 @@
 from django.contrib import admin
-from tinymce.widgets import TinyMCE
+#from tinymce.widgets import TinyMCE
 from .models import LiteraryWork, Category
 from django.db import models
 
