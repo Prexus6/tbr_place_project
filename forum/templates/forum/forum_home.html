@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="div03-prompts" id="prompts-section">
+    <div class="div0301-predefprompts">
+
+        <h1>Forum Home</h1>
+
+        <a href="{% url 'forum_home' %}" >Home</a> <!-- Added Home link -->
+
+        <h2>My Threads</h2>
+        {% if user_threads %}
+            <ul>
+                {% for thread in user_threads %}
+                    <li>
+                        <a href="{% url 'thread_detail' thread.pk %}" >{{ thread.title }}</a>
+                        <a href="{% url 'edit_thread' thread.pk %}" class="btn-edit">Edit</a>
+                        <a href="{% url 'delete_thread' thread.pk %}"class="btn-remove">Delete</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>You have no threads.</p>
+        {% endif %}
+
+        <h2>Commented Threads</h2>
+        {% if commented_threads %}
+            <ul>
+                {% for thread in commented_threads %}
+                    <li>
+                        <a href="{% url 'thread_detail' thread.pk %}">{{ thread.title }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>You have no commented threads.</p>
+        {% endif %}
+
+        <h2>All Threads</h2>
+        <ul>
+            {% for thread in threads %}
+                <li><a href="{% url 'thread_detail' thread.pk %}" >{{ thread.title }}</a></li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'create_thread' %}"  class="main-button-prompts">Create new thread</a>
+   </div>
+</div>
+{% endblock %}

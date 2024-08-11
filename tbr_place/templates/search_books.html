@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Books</title>
+</head>
+<body>
+    <p>Welcome, {{ user.username }}!</p>
+    <h1>Search Books</h1>
+    <form method="POST" action="{% url 'search_books_view' %}">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="Enter book title">
+        <button type="submit">Search</button>
+    </form>
+
+    <h2>Your Favorite Books</h2>
+    <ul>
+        {% for favorite in favorites %}
+            <li>
+                <img src="{{ favorite.book.book_cover.url }}" alt="Cover" width="50" height="75">
+                <strong>{{ favorite.book.book_title }}</strong> by {{ favorite.book.book_author.author_name }}
+                <p>Rating: {{ favorite.book.book_rating }}</p>
+                <p>Genres: {% for genre in favorite.book.book_genre.all %} {{ genre.genre_name }} {% endfor %}</p>
+                <form method="POST" action="{% url 'remove_from_favorites' favorite.book.id %}">
+                    {% csrf_token %}
+                    <button type="submit">Remove from Favorites</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

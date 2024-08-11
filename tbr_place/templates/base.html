@@ -1,0 +1,75 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TBR Place</title>
+      <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" type="text/css" href="{% static 'css/literary_works.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/book_section.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/table_edit_delete.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+
+  </head>
+  <body>
+    <div class="div01-nav">
+
+      <div class="div0101-logo">
+        <div class="logo-image">
+          <img src="{% static 'images/TBR place logo.png' %}" alt="Logo" class="Logo_charcoal">
+        </div>
+        <p>TBR Place</p>
+      </div>
+      <div class="nav-button">
+                {% if user.is_authenticated %}
+                    <p class="welcome-message"> Welcome, {{ user.username }}!</p>
+                    <button class="SignBtn" onclick="location.href='{% url 'home' %}'">Home</button>
+                    <button class="SignBtn" onclick="location.href='{% url 'user_profile' %}'">Profile</button>
+                    <button class="SignBtn" onclick="location.href='{% url 'literary_work_create' %}'">Add New Work</button>
+                    <button class="SignBtn" onclick="location.href='{% url 'forum_home' %}'">Forum</button>
+                    <div class="auth-actions">
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="SignBtn logout-btn">Logout</button>
+                        </form>
+                    </div>
+                {% else %}
+                <a href="{% url 'login' %}">Sign In</a>
+                <a href="{% url 'signup' %}">Sign Up</a>
+                {% endif %}
+
+
+      </div>
+      <div class="nav-menu-btn">
+        <i class="bx bx-menu" onclick="myMenuFunction"></i>
+      </div>
+    </div>
+
+
+
+{% block content %}
+
+{% endblock %}
+
+<!------------------------ pätička---------------------------->
+
+    <div class="div05-footer"></div>
+    <script src="script.js"></script>
+
+
+
+
+  </body>
+</html>
+

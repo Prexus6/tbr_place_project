@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  <div class="div03-prompts" id="prompts-section">
+      <div class="div0301-predefprompts">
+          <h2>{{ user.username }}'s Profile</h2>
+          <div class="user-info">
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+          </div>
+      </div>
+  </div>
+
+  <div class="div03-prompts" id="prompts-section">
+      <div class="div0301-predefprompts">
+          <div id="user-works" class="literary-works-section">
+            <div class="header-container">
+              <h3>Your Literary Works</h3>
+              <a href="{% url 'literary_work_create' %}" class="btn btn-primary">Add New Work</a>
+            </div>
+            <div id="user-results">
+              {% for work in works %}
+                <div>
+                  {% if work.image %}
+                    <img src="{{ work.image.url }}" alt="{{ work.title }}" style="max-width: 200px;">
+                  {% endif %}
+                  <h4>{{ work.title }}</h4>
+                  <p><strong>Category:</strong> {{ work.category.name }}</p>
+                  <p>{{ work.description|slice:":150" }}{% if work.description|length > 150 %}...{% endif %}</p>
+                  <a href="{% url 'literary_work_detail' work.pk %}">Read More</a>
+                  <a href="{% url 'literary_work_edit' work.pk %}" class="btn btn-secondary">Edit</a>
+                </div>
+              {% empty %}
+                <div>No literary works found.</div>
+              {% endfor %}
+            </div>
+          </div>
+      </div>
+  </div>
+
+<style>
+.user-info {
+  margin-bottom: 20px;
+}
+
+.literary-works-section {
+  margin-top: 20px;
+}
+
+.literary-works-section img {
+  border-radius: 8px;
+}
+
+</style>
+
+{% endblock %}

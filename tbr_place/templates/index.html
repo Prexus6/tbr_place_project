@@ -1,296 +1,581 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TBR Place</title>
-    {% load static %}
-    <script>
-      // Sample data from the database
-      const database = [
-        { type: 'Author', content: 'Item 1 of Type 1' },
-        { type: 'Cover', content: 'Item 1 of Type 2' },
-        { type: 'Time', content: 'Item 2 of Type 1' },
-        { type: 'Title', content: 'Item 1 of Type 3' },
-        { type: 'Genre', content: 'Item 2 of Type 2' },
-        { type: 'Other', content: 'Item 2 of Type 2' }
-      ];
+    <link rel="stylesheet" href="styles.css" />
+      <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+      <link rel="stylesheet" type="text/css" href="{% static 'css/literary_works.css' %}">
+      <link rel="stylesheet" type="text/css" href="{% static 'css/book_section.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+       <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  </head>
+  <body>
+  <style>
+    .auth-actions {
+    margin-left: auto;
+    }
+  </style>
 
-      // Function to filter data based on selected checkboxes
-      function filterData() {
-        // Get the selected types
-        const selectedTypes = Array.from(document.querySelectorAll('input[type=checkbox]:checked'))
-          .map(checkbox => checkbox.value);
+    <div class="div01-nav">
 
-        // Filter the database based on selected types
-        const filteredData = database.filter(item => selectedTypes.includes(item.type));
+      <div class="div0101-logo">
+        <div class="logo-image">
+          <img src="{% static 'images/TBR place logo.png' %}" alt="Logo" class="Logo_charcoal">
+        </div>
+        <p>TBR Place</p>
+      </div>
+      <div class="nav-button">
+                {% if user.is_authenticated %}
+                    <p class="welcome-message"> Welcome, {{ user.username }}!</p>
+                    <button class="SignBtn" onclick="location.href='{% url 'home' %}'">Home</button>
+                    <button class="SignBtn" onclick="location.href='{% url 'user_profile' %}'">Profile</button>
+                    <button class="SignBtn" onclick="location.href='{% url 'literary_work_create' %}'">Add New Work</button>
+                    <button class="SignBtn" onclick="location.href='{% url 'forum_home' %}'">Forum</button>
+                    <div class="auth-actions">
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="SignBtn logout-btn">Logout</button>
+                        </form>
+                    </div>
+                {% else %}
+                <a href="{% url 'login' %}">Sign In</a>
+                <a href="{% url 'signup' %}">Sign Up</a>
+                {% endif %}
 
-        // Display the filtered data
-        const outputField = document.getElementById('outputField');
-        outputField.innerHTML = filteredData.map(item => item.content).join('<br>');
-      }
 
-      // Function to handle keypress events on labels
-      // Function to handle keypress events on checkboxes
-      function handleKeyPress(event) {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault(); // Prevent default action for the key
-          event.target.checked = !event.target.checked; // Toggle checkbox state
-          filterData(); // Call filterData function
+      </div>
+      <div class="nav-menu-btn">
+        <i class="bx bx-menu" onclick="myMenuFunction"></i>
+      </div>
+    </div>
+    <!----------------- Form Box ------------------->
+        <!----------------------- WELCOME SECTION ----------------------------->
+    <div class="div02-intro">
+      <div class="div0201-welcome">
+        <h2 class="welcome-reader">Hi, readers and writters!</h2>
+        <p class="find-your-book">Find your next book to read </p>
+                                    <p class="find-your-book">Add your own literary work </p>
+          <p class="find-your-book">Read the works of other users, share, comment, rate</p>
+
+        <div class="div0201-mainbuttons">
+          <a href="#prompts-section" class="main-button-prompts">Generate a prompt</a>
+          <a href="#searchForm-id" class="main-button-books">Find your book</a>
+
+        </div>
+      </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const link = document.querySelector('a[href="#searchForm-id"]');
+        if (link) {
+            link.addEventListener('click', (event) => {
+                event.preventDefault();
+                document.getElementById('searchForm-id').scrollIntoView({ behavior: 'smooth' });
+            });
         }
-      }
-    </script>
-    <script>
-      // This function simulates fetching data from a database
-      function fetchData() {
-        // Simulated data from the database
-        const data = "Generated text from database";
-        // Display the data in the output element
-        document.getElementById('outputField').value = data;
-      }
-    </script>
-</head>
-<body>
-    <header>
-        <nav>
-            <div class="logo">
-                <img src="{% static 'img/logo.png' %}" alt="Logo">
+    });
+</script>
+
+    <!------------------- PROMPTS SECTION --------------------------->
+    <!--------------- QUICK PROMPTS GENERATOR ----------------->
+    <div class="div03-prompts" id="prompts-section">
+      <div class="div0301-predefprompts">
+        <div class="QuickPromptGenerator">
+          <h3 class="QuickPromptGenTitle">Quick Prompt Generator</h3>
+                <form method="post" action="{% url 'home' %}">
+                    {% csrf_token %}
+                    <button class="QuickPromptGenButton" type="submit" name="generate_prompt">Just click here!</button>
+                </form>
+          <div class="display-field01" id="displayField01"> {{ prompt_name }}</div>
+        </div>
+
+    <!--------------- FILTERED PROMPTS ----------------->
+    <div class="div0302-quickpromptfilter">
+        <h3 class="QuickPromptFilterTitle">Prompts Filter</h3>
+        <form id="generate-prompt-form" method="post" action="{% url 'generate_filtered_prompt' %}">
+            {% csrf_token %}
+            <div class="QuickPromptFilterContainer">
+                <div class="QuickPromptSelectBtn">
+                    <span class="btn-text">Select prompt types:</span>
+                    <span class="arrow-down">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </span>
+                </div>
+                <ul class="list-items">
+                    {% for prompt_type in all_prompt_types %}
+                    <li class="item">
+                        <span class="checkbox">
+                            <input type="checkbox" name="selectedTypes[]" value="{{ prompt_type.prompt_type_name }}">
+                        </span>
+                        <span class="item-text">{{ prompt_type.prompt_type_name }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
-            <div>
-                <h1>TBR Place</h1>
-            </div>
-            <div class="auth-buttons">
-                <a href="{% url 'login' %}"><button class="sign-in">Sign In</button></a>
-                <a href="{% url 'register' %}"><button class="sign-up">Sign Up</button></a>
-            </div>
-        </nav>
-    </header>
-
-    <main>
-        <div>
-            <h2>Hi, Reader!</h2>
-            <p class="subtitle">Find your next book to read:</p>
-            <button class="go-to_prompts">Generate a prompt</button>
-            <button class="go-to_books">Pick a book from your list</button>
-        </div>
-        <div class="preDef">
-            <h3 class="pre-defined_prompts">Pre-defined Prompts</h3>
-            <br>
-            <p class="quick_prompt_generator">Quick Prompt Generator</p>
-            <br>
-            <p class="quick_prompt_generator_click">Just click the button!</p>
-            <br>
-            <button class="quick_prompt_generator_button"></button>
-            <br>
-            <output id="generatedQuickPrompt">Here comes your prompt...</output>
-            <br>
-        </div>
-        <br>
-        <div class="userDef">
-            <p class="select_our_prompt_types">Selected your prompt types first:</p>
-            <br>
-            <label><input type="checkbox" value="Author" onclick="filterData()" onkeypress="handleKeyPress(event)">Author</label>
-            <br>
-            <label><input type="checkbox" value="Genre" onclick="filterData()" onkeypress="handleKeyPress(event)">Genre</label>
-            <br>
-            <label><input type="checkbox" value="Time" onclick="filterData()" onkeypress="handleKeyPress(event)">Time</label>
-            <br>
-            <label><input type="checkbox" value="Title" onclick="filterData()" onkeypress="handleKeyPress(event)">Title</label>
-            <br>
-            <label><input type="checkbox" value="Cover" onclick="filterData()" onkeypress="handleKeyPress(event)">Cover</label>
-            <br>
-            <label><input type="checkbox" value="Other" onclick="filterData()" onkeypress="handleKeyPress(event)">Other</label>
-            <br>
-            <p class="filtered_prompt_generator_click">Now click the button!</p>
-            <br>
-            <button class="filtered_prompt_generator_button"></button>
-            <br>
-            <output id="generatedFilteredQuickPrompt">Here comes your prompt...</output>
-            <br>
-        </div>
-        <h3 class="books">Books</h3>
-        <br>
-        <div class="book-list" id="book-list">
-            <p class="list_of_books">List of my books:</p>
-            <br>
-            <!-- The DYNAMIC list of books included in the user database will be listed here with Remove and Edit buttons at the end of each line. To clarify: How to link buttons to the correct book/line? -->
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Simulated data (replace with actual API call)
-                    var books = [
-                        { title: 'Book 1', author: 'Author 1' },
-                        { title: 'Book 2', author: 'Author 2' },
-                        { title: 'Book 3', author: 'Author 3' }
-                    ];
-
-                    var bookList = document.getElementById('book-list');
-
-                    books.forEach(function(book) {
-                        var bookDiv = document.createElement('div');
-                        bookDiv.classList.add('book');
-
-                        var title = document.createElement('h3');
-                        title.textContent = book.title;
-
-                        var author = document.createElement('p');
-                        author.textContent = 'Author: ' + book.author;
-
-                        bookDiv.appendChild(title);
-                        bookDiv.appendChild(author);
-
-                        bookList.appendChild(bookDiv);
-                    });
-                });
-            </script>
-            <button class="remove_book">Remove</button>
-            <button class="edit_book">Edit</button>
-            <br>
-        </div>
-        <form id="bookSearchForm">
-            <label for="searchInput">Search for books:</label>
-            <input type="text" id="searchInput" name="searchInput" placeholder="Enter book title, author, etc." required>
-            <button type="submit">Search</button>
+            <button class="QuickPromptFilterGenButton" type="submit">Generate prompt</button>
         </form>
-        <!-- Display search results and handle API integration in JavaScript -->
-        <div id="searchResults"></div>
+
+        <div class="display-field02" id="displayField02">
+            <!-- Vybrané prompt typy sa zobrazia tu -->
+            <p id="generated-prompt-content">Please select at least one prompt type to generate a prompt.</p>
+        </div>
+    </div>
+
+
+
+
+      <script>
+$(document).ready(function() {
+    $("form#generate-prompt-form").on("submit", function(event) {
+        event.preventDefault();
+
+        $.ajax({
+            type: "POST",
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            success: function(response) {
+                console.log('AJAX Success:', response);
+                $("#displayField02").html(response.generated_prompt);
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX error:", status, error);
+            }
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const selectBtn = document.querySelector('.QuickPromptSelectBtn');
+    const listItems = document.querySelector('.list-items');
+
+    selectBtn.addEventListener('click', function() {
+        listItems.classList.toggle('visible');
+    });
+});
+
+</script>
+
+
+        <style>
+            .list-items {
+    display: none;
+
+}
+
+.list-items.visible {
+    display: block;
+}
+
+        </style>
+
+
+      <!--------------------------------- MY PROPMPTS SECTION ----------------------------->
+
+      <!----- pridávanie vlastných promptových štýlov---->
+      <div class="div0302-myprompts">
+            <h3 class="QuickPromptGenTitle">My prompts</h3>
+              <div class="div0302-add-prompt-type">
+            <h3 class="QuickPromptGenTitle">Add a Prompt Type</h3>
+            <form method="post" action="{% url 'home' %}">
+                {% csrf_token %}
+                {{ prompt_type_form.as_p }}
+                <button type="submit" name="add_prompt_type">Add Prompt Type</button>
+            </form>
+        </div>
+
+            <!----- pridávanie vlastných promptov na základe vytvorených vlastných typov---->
+          <div class="div0303-add-prompt">
+               <div class="QuickPromptGenerator">
+                    <h3 class="QuickPromptGenTitle">Add a Prompt</h3>
+                    <form method="post" action="{% url 'add_my_prompt' %}">
+                        {% csrf_token %}
+                        {{ prompt_form.as_p }}
+                        <button type="submit" name="add_prompt">Add Prompt</button>
+                    </form>
+                </div>
+            </div>
+
+          <!----- základné zobrazenie funkcionality : zoznam vlastných promptov (len tabuľkovo)+ remove / edit---->
+          <div class="div0302-myprompts">
+            <h3 class="QuickPromptGenTitle">My Prompts</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Prompt Name</th>
+                        <th>Type</th>
+                        <th>Edit</th>
+                        <th>Remove</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prompt in user_prompts %}
+                    <tr>
+                        <td>{{ prompt.prompt_name }}</td>
+                        <td>{{ prompt.prompt_type.myprompt_type_name }}</td>
+                        <td>
+                            <a href="{% url 'edit_prompt' prompt.id %}" class="btn-edit">Edit</a>
+                        </td>
+                        <td>
+                            <form method="post" action="{% url 'remove_prompt' prompt.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-remove">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="no-prompts">No prompts available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+      </div>
+
+          <style>
+                  .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #a1baa2;
+            color: #fff;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:hover {
+            background-color: #d3e2e3;
+        }
+
+        .btn-edit, .btn-remove {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-edit {
+            background-color: #4caf50;
+        }
+
+        .btn-remove {
+            background-color: #f44336;
+        }
+
+        .btn-edit:hover {
+            background-color: #45a049;
+        }
+
+        .btn-remove:hover {
+            background-color: #e53935;
+        }
+
+        form {
+            display: inline;
+        }
+
+        .no-prompts {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+
+
+    <!-- Generovanie vlastného promptu na základe vybraných typov -->
+
+        <div class="QuickPromptGenerator">
+            <div class="div0304-generate-prompt">
+                <h3 class="QuickPromptGenTitle">Generate Custom Prompt</h3>
+                <form id="generate-prompt-form" method="post" action="{% url 'generate_custom_prompt' %}">
+                    {% csrf_token %}
+                    <label for="prompt_types">Select Prompt Types:</label>
+                    <select id="prompt_types" name="selectedTypes[]" multiple>
+                        {% for type in prompt_types %}
+                            <option value="{{ type.myprompt_type_name }}">{{ type.myprompt_type_name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit">Generate Prompt</button>
+                </form>
+
+                <div class="generated-prompt">
+                    <h4>Generated Prompt:</h4>
+                    <p id="generated-prompt-content">{{ generated_prompt }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+          // zabezpečené nerefreshovanie po vygenerovaní promptu  (testovať všetky verzie prehliadačov)
+$(document).ready(function() {
+    $("form#generate-prompt-form").on("submit", function(event) {
+        event.preventDefault();
+
+        $.ajax({
+            type: "POST",
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            success: function(response) {
+                $("#generated-prompt-content").html(response.generated_prompt);
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX error:", status, error);
+            }
+        });
+    });
+});
+
+</script>
+
+     <!-------------- Random Quote Generator Section ---------------->
+    <div class="div03-prompts" id="prompts-section">
+        <div class="div0301-predefprompts">
+           <div class="quote-generator">
+            <h3>Random Quote Generator</h3>
+            <button id="generateQuote">Get a Random Quote</button>
+            <div id="quoteDisplay" class="quote-display"></div>
+        </div>
+
+  <style>
+
+
+        .quote-generator {
+            text-align: center;
+        }
+
+        .quote-generator h3 {
+            color: #2d342d;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        #generateQuote {
+            background-color: #c4a59d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #generateQuote:hover {
+            background-color: #a88b84;
+        }
+
+        .quote-display {
+            margin-top: 20px;
+
+            color: #333;
+            border-left: 4px solid  #a1baa2;
+            padding-left: 20px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 0;
+        }
+
+        .quote-display.visible {
+            opacity: 1;
+        }
+    </style>
 
         <script>
-            document.getElementById('bookSearchForm').addEventListener('submit', function(event) {
-                event.preventDefault(); // Prevent default form submission
-
-                // Get the search query from the input field
-                const searchQuery = document.getElementById('searchInput').value.trim();
-
-                // Construct the API request URL (Replace with your actual Amazon API endpoint)
-                const amazonApiUrl = `https://api.example.com/books/search?q=${encodeURIComponent(searchQuery)}`;
-
-                // Clear previous search results
-                const searchResultsDiv = document.getElementById('searchResults');
-                searchResultsDiv.innerHTML = '';
-
-                // Make an API request to Amazon
-                fetch(amazonApiUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        // Process the response and display search results
-                        data.forEach(book => {
-                            const bookResultDiv = document.createElement('div');
-                            bookResultDiv.classList.add('book-result');
-
-                            const title = document.createElement('h3');
-                            title.textContent = book.title;
-                            bookResultDiv.appendChild(title);
-
-                            const author = document.createElement('p');
-                            author.textContent = `Author: ${book.author}`;
-                            bookResultDiv.appendChild(author);
-
-                            const addButton = document.createElement('button');
-                            addButton.textContent = 'Add';
-                            addButton.addEventListener('click', function() {
-                                // Replace with your logic to add the book to the user's database
-                                alert(`Added ${book.title} by ${book.author} to your database!`);
-                            });
-                            bookResultDiv.appendChild(addButton);
-
-                            searchResultsDiv.appendChild(bookResultDiv);
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error fetching data:', error);
-                        alert('Error fetching data. Please try again later.');
-                    });
-            });
+          document.getElementById('generateQuote').addEventListener('click', function() {
+    fetch('/random-quote/')
+        .then(response => response.json())
+        .then(data => {
+            const quoteDisplay = document.getElementById('quoteDisplay');
+            if (data.error) {
+                quoteDisplay.innerText = 'Error fetching quote';
+            } else {
+                quoteDisplay.innerText = `"${data.text}" – ${data.author}`;
+                quoteDisplay.classList.add('visible');
+                setTimeout(() => quoteDisplay.classList.remove('visible'), 5000);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('quoteDisplay').innerText = 'Error fetching quote';
+        });
+});
         </script>
-        <div class="filter-books">
-            <button id="toggleButton" onclick="toggleFilter()">Show Filter</button>
-            <div id="filterSection" class="hidden">
-                <h2>Filter Section</h2>
-                <!-- Add your filter fields here -->
-                <label for="filter1">Filter 1:</label>
-                <input type="text" id="filter1" name="filter1"><br>
-                <label for="filter2">Filter 2:</label>
-                <input type="text" id="filter2" name="filter2"><br>
-                <button type="submit">Apply Filter</button>
-            </div>
 
-            <script>
-                function toggleFilter() {
-                    var filterSection = document.getElementById('filterSection');
-                    var toggleButton = document.getElementById('toggleButton');
 
-                    if (filterSection.classList.contains('hidden')) {
-                        filterSection.classList.remove('hidden');
-                        toggleButton.textContent = 'Hide Filter';
-                    } else {
-                        filterSection.classList.add('hidden');
-                        toggleButton.textContent = 'Show Filter';
-                    }
-                }
-            </script>
-            <br>
+
+
+
+
+
+    <!------------------------ BOOKS SECTION ---------------------------->
+
+    <!------ základné vyhľadávanie kníh ------->
+    <div class="div0302-quickpromptfilter" id="searchForm-id">
+      <h3 class="QuickPromptFilterTitle">Book Search</h3>
+      <form id="searchForm">
+          {% csrf_token %}
+          <input type="text" id="searchTitle" name="title" placeholder="Enter book title" />
+
+          <label>
+              <input type="checkbox" id="filterByAuthor" name="filterByAuthor" />
+              Search by Author
+          </label>
+          <input type="text" id="searchAuthor" name="author" placeholder="Enter author name" />
+
+          <label>
+              <input type="checkbox" id="filterByGenre" name="filterByGenre" />
+              Search by Genre
+          </label>
+          <input type="text" id="searchGenre" name="genre" placeholder="Enter genre" />
+
+          <button type="submit">Search</button>
+      </form>
+
+      <div id="results"></div>
+      <div id="pagination"></div>
+    </div>
+    <!---- script pre BOOK SECTION ------->
+     <script src="{% static 'js/book_section.js' %}"></script>
+
+
+
+
+    <!------ literárne diela, myšlienky, úvahy autorov ------->
+    <div id="user-works" class="literary-works-section">
+        <div class="header-container">
+            <h2>Featured Literary Works</h2>
+            <a href="{% url 'literary_work_create' %}" class="btn btn-primary">Add New Work</a>
         </div>
-        <div class="how_many_books">
-            <label for="numberInput">How many books you wish to pick?</label>
-            <br>
-            <p class="books_max">Maximum number of books:</p>
-            <div>
-                <span id="itemCount" class="item-count">0</span>
-                <!-- JavaScript to update the item count -->
-                <script>
-                    // Example: Assuming itemCount is updated dynamically
-                    var itemCount = 100; // Replace with your dynamic data (e.g., fetched from a database)
-                    document.getElementById('itemCount').textContent = itemCount;
-                </script>
-            </div>
-
-            <input type="number" id="numberInput" name="numberInput" min="1" max="10" step="1" required>
-            <button onclick="generateBooks()" type="go">Go!</button>
-            <div id="bookList" class="hidden">
-                <h2>Your TBR</h2>
-                <ul id="books"></ul>
-            </div>
-
-            <script>
-                function generateBooks() {
-                    var numberInput = document.getElementById('numberInput').value;
-                    var bookList = document.getElementById('bookList');
-                    var booksUl = document.getElementById('books');
-
-                    // Array of sample book titles (you can replace with actual database data)
-                    var bookTitles = [
-                        "The Great Gatsby",
-                        "To Kill a Mockingbird",
-                        "1984",
-                        "Pride and Prejudice",
-                        "The Catcher in the Rye",
-                        "Jane Eyre",
-                        "Moby Dick",
-                        "The Hobbit",
-                        "Harry Potter and the Philosopher's Stone",
-                        "The Lord of the Rings"
-                    ];
-
-                    // Clear previous list
-                    booksUl.innerHTML = '';
-
-                    // Generate random books based on user input
-                    for (var i = 0; i < numberInput; i++) {
-                        var randomIndex = Math.floor(Math.random() * bookTitles.length);
-                        var bookTitle = bookTitles[randomIndex];
-                        var li = document.createElement('li');
-                        li.textContent = bookTitle;
-                        booksUl.appendChild(li);
-                    }
-
-                    // Show the book list
-                    bookList.classList.remove('hidden');
-                }
-            </script>
+        <div class="filter-container">
+            <label for="category-filter">Vyberte kategóriu:</label>
+            <select id="category-filter">
+                <option value="all">Všetky kategórie</option>
+            </select>
+            <label for="sort-by-filter">Zoradiť podľa:</label>
+            <select id="sort-by-filter">
+                <option value="date_published">Dátum publikovania</option>
+                <option value="highest_rating">Najlepšie hodnotenie</option>
+                <option value="most_ratings">Najviac hodnotení</option>
+            </select>
+            <button id="filter-button">Filtrovať</button>
         </div>
-        <div>
-            <button type="start-over">Start over</button> <!-- resets the selection and return the user to Filter -->
+
+        <div id="user-results">
+            {% for work in works %}
+                <div>
+                    {% if work.image %}
+                        <img src="{{ work.image.url }}" alt="{{ work.title }}">
+                    {% endif %}
+                    <h3>{{ work.title }}</h3>
+                    <p><strong>Author:</strong> {{ work.user.username }}</p>
+                    <p><strong>Category:</strong> {{ work.category.name }}</p>
+                    <p>{{ work.description|slice:":150" }}{% if work.description|length > 150 %}...{% endif %}</p>
+                    <p><strong>Average Rating:</strong> {% if work.average_rating %}{{ work.average_rating|floatformat:1 }}{% else %}No Ratings{% endif %}</p>
+                    <p><strong>Number of Ratings:</strong> {{ work.num_ratings }}</p>
+                    <p><strong>Number of Comments:</strong> {{ work.num_comments }}</p>
+                    <a href="{% url 'literary_work_detail' work.pk %}">Read More</a>
+                </div>
+            {% empty %}
+                <div>No literary works found.</div>
+            {% endfor %}
         </div>
-    </main>
+
+        <div id="pagination" class="pagination-container">
+        {#      paginácia      #}
+        </div>
+
+    </div>
+    <!---- script pre LITERARY WORK SECTION ------->
+    <script src="{% static 'js/library_work.js' %}"></script>
+
+
+
+<!------------------------ pätička---------------------------->
+
+
+    <div class="div05-footer"></div>
+        <button id="scrollToTopBtn" class="btn btn-primary" title="Go to top">⇧</button>
+    <script src="script.js"></script>
+
+<script>
+ document.addEventListener('DOMContentLoaded', function () {
+    var scrollToTopBtn = document.getElementById('scrollToTopBtn');
+
+
+    window.addEventListener('scroll', function () {
+        if (window.scrollY > 300) {
+            scrollToTopBtn.style.display = 'block';
+        } else {
+            scrollToTopBtn.style.display = 'none';
+        }
+    });
+
+
+    scrollToTopBtn.addEventListener('click', function () {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+});
+
+</script>
+
+
+ <style>
+#scrollToTopBtn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: none; /
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 20px;
+    z-index: 1000;
+}
+
+#scrollToTopBtn:hover {
+    background-color: #1b5209;
+}
+
+
+
+</style>
+
 </body>
 </html>
