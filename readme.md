@@ -73,4 +73,4 @@ Filip Húšťava, Ondřej Kříž
 ![API](tbr_place_project/static/images/tbr_place_overview3.png)
 ![API](tbr_place_project/static/images/tbr_place_overview4.png)
 
-
+ 
