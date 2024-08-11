@@ -1,4 +1,4 @@
-![Logo](/static/Logo_charcoal.png)
+![Logo](tbr_place_project/static/images/TBR place logo.png)
 
 # O projektu
 
@@ -61,10 +61,16 @@ url: path('forum/', include('forum.urls')),
 - přihlášení do fora je povinné jinak nemůže komentovat ani vytvářet vlákna
 
 ## Kontakt
-email na správce: filipchaser@gmail.com, kriz111@email.cz 
+email na správce: filipchaser@gmail.com, kriz111@gmail.com 
 ## Contributori
 Filip Húšťava, Ondřej Kříž
 
-![Hlavní stránka](/images/main_page.png)
+## Diagram databáze
+
+## Náhledy
+![Hlavní stránka](tbr_place_project/static/images/tbr_place_overview.jpg)
+![API](tbr_place_project/static/images/tbr_place_overview2.png)
+![API](tbr_place_project/static/images/tbr_place_overview3.png)
+![API](tbr_place_project/static/images/tbr_place_overview4.png)
 
 

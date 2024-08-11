@@ -8,8 +8,11 @@
             <form method="post">
                 {% csrf_token %}
                 {{ form.username.label_tag }} {{ form.username }}
+                {{ form.username.errors }}
                 {{ form.password1.label_tag }} {{ form.password1 }}
+                {{ form.password1.errors }}
                 {{ form.password2.label_tag }} {{ form.password2 }}
+                {{ form.password2.errors }}
                 <label for="secret_question">Secret question:</label>
                 <input type="text" id="secret_question" name="secret_question" value="What is your favorite book?" required>
                 {{ form.secret_answer.label_tag }} {{ form.secret_answer }}
