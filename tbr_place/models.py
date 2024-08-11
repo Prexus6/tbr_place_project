@@ -1,5 +1,10 @@
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, MinLengthValidator
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.db.models import Sum
+
+from accounts.models import CustomUser
 
 
 class PromptType(models.Model):
@@ -73,10 +78,22 @@ class Book(models.Model):
     book_genre = models.ManyToManyField(Genre, related_name='books')
     book_rating = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
     book_cover = models.ImageField(upload_to='book_covers/')
-    isbn = models.CharField(max_length=13, unique=True)  # Predpokladáme formát ISBN-13
+    isbn = models.CharField(max_length=13, unique=True, validators=[MinLengthValidator(13)])
 
     def __str__(self):
         return self.book_title
+
+
+class FavoriteBook(models.Model):
+    """Model predstavujúci obľúbené knihy používateľov."""
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='favorite_books')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='favorited_by')
+
+    class Meta:
+        unique_together = ('user', 'book')
+
+    def __str__(self):
+        return f"{self.user.username}'s favorite: {self.book.book_title}"
 
 
 class Reader(models.Model):
@@ -86,7 +103,7 @@ class Reader(models.Model):
     Atribúty:
         user_id (IntegerField): ID čitateľa.
     """
-    user_id = models.IntegerField(unique=True)  # Predpokladáme, že user_id je jedinečné
+    user_id = models.IntegerField(unique=True)
 
     def __str__(self):
         return f'Čitateľ {self.user_id}'
@@ -101,7 +118,7 @@ class MyPromptType(models.Model):
         reader (ForeignKey): Čitateľ spojený s týmto typom promptu, referencuje Reader.
     """
     myprompt_type_name = models.CharField(max_length=255)
-    reader = models.ForeignKey(Reader, on_delete=models.CASCADE, related_name='myprompt_types')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.myprompt_type_name
@@ -118,7 +135,41 @@ class MyPrompt(models.Model):
     """
     prompt_name = models.TextField()
     prompt_type = models.ForeignKey(MyPromptType, on_delete=models.CASCADE, related_name='my_prompts')
-    reader = models.ForeignKey(Reader, on_delete=models.CASCADE, related_name='my_prompts')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.prompt_name
+
+
+class Quote(models.Model):
+    text = models.TextField()
+    author = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'"{self.text}" – {self.author}'
+
+
+class ReadingGoal(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    goal_name = models.CharField(max_length=100)
+    target_amount = models.PositiveIntegerField()
+    current_amount = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.goal_name} - {self.user}"
+
+    def progress_percentage(self):
+        total_progress = ReadingProgress.objects.filter(goal=self).aggregate(Sum('amount'))['amount__sum'] or 0
+        if self.target_amount > 0:
+            percentage = (total_progress / self.target_amount) * 100
+            return min(percentage, 100)
+        return 0
+
+
+class ReadingProgress(models.Model):
+    goal = models.ForeignKey(ReadingGoal, on_delete=models.CASCADE)
+    date = models.DateField()
+    amount = models.PositiveIntegerField()  # Napr. počet strán, hodín
+
+    def __str__(self):
+        return f"{self.goal.goal_name} - {self.date}: {self.amount}"

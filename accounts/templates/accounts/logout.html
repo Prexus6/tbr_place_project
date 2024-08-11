@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<header>
+    <img src="{% static 'Logo_charcoal.png' %}" alt="Logo">
+</header>
+<main>
+    <h2>Logout</h2>
+    <p>You have been logged out. <a href="{% url 'login' %}">Login again</a></p>
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</main>
+{% endblock %}

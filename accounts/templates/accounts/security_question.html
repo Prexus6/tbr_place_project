@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="security-question-container">
+    <h1>Security Question</h1>
+    <form method="post">
+        {% csrf_token %}
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <p>Secret Question: {{ secret_question }}</p>
+        <label for="secret_answer">Secret answer:</label>
+        <input type="text" id="secret_answer" name="secret_answer" required>
+        <button type="submit">Submit</button>
+    </form>
+</div>
+{% endblock %}
